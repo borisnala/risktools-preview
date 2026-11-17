@@ -1,0 +1,1679 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="dummy-csrf-token">
+  <title>Global Risk Portal - Request access [DUMMY DATA]</title>
+  
+  <style>/* portal.css */
+:root {
+  /* Dark theme (19-Sep-2026 nav shell restructure). Same variable names
+     portal.css and every page CSS already key off of -- repointing the
+     values here is what makes the whole shared chrome (buttons, tables,
+     inputs, notices) dark without rewriting each rule. Page-specific CSS
+     files (hsb_pov.css, client_intel.css, growth.css, ...) are out of scope
+     for this pass and still hardcode their own light colors -- see the
+     shell delivery report for the list. */
+  color-scheme: dark;
+  /* Values come from the --gr-* theme tokens (shell.css): dark default, light via data-theme. */
+  --ink: var(--gr-text, #fafafa);
+  --muted: var(--gr-muted, #a1a1aa);
+  --muted-2: var(--gr-muted-2, #71717a);
+  --line: var(--gr-border, #27272a);
+  --surface: var(--gr-panel, #18181b);
+  --canvas: var(--gr-bg, #0f0f11);
+  --nav: var(--gr-panel, #18181b);
+  --nav-hover: var(--gr-border, #27272a);
+  --green: var(--gr-pos, #22c55e);
+  --green-dark: color-mix(in srgb, var(--gr-pos, #22c55e) 80%, black);
+  --amber: var(--gr-warn, #fbbf24);
+  --red: var(--gr-neg, #ef4444);
+  --blue: var(--gr-accent, #A855F7);
+  --radius: 14px;
+  --shadow: var(--gr-shadow, 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35));
+  font-family: Inter, "Segoe UI", system-ui, Arial, sans-serif;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; color: var(--ink); background: var(--canvas); font-size: 14px; letter-spacing: 0; }
+button, input { font: inherit; letter-spacing: 0; }
+button { cursor: pointer; }
+button:disabled { cursor: not-allowed; opacity: .55; }
+input:disabled, select:disabled, textarea:disabled { opacity: .6; cursor: not-allowed; background: var(--canvas); }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+
+.app-bar {
+  /* 60px of brand chrome on every page, above a nav bar, above a page head.
+     44px still fits the logo, role badge and sign-out comfortably. */
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 14px;
+  color: #fff;
+  background: linear-gradient(120deg, #16202e 0%, #1c2b40 100%);
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.brand-row, .identity-row { display: flex; align-items: center; gap: 10px; }
+/* .brand-row lays out its ONE child, this anchor -- so the anchor has to be a
+   flex container itself or the mark and the text stack. Stacked they are 57px
+   tall inside a 44px bar: the mark rendered above the bar and the breadcrumb
+   below it. The rule existed only in client_intel/hsb_pov/toxic_monitor css,
+   so the 10 pages that load neither also showed a blue underlined link on a
+   dark bar. Shared sheet, so every page gets it. */
+.brand-link { display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; }
+.brand-row strong { display: block; font-size: 13.5px; line-height: 1.2; }
+.environment { display: block; color: #aeb8c0; font-size: 10.5px; margin-top: 0; }
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  background: var(--green);
+  /* Dark theme's --green (--gr-pos: #22c55e) is only 2.28:1 against white text --
+     dark text on the fill reads correctly in both themes since --canvas (--gr-bg)
+     is the opposite lightness of --green in each theme. */
+  color: var(--canvas);
+  font-weight: 800;
+  border-radius: 6px;
+}
+.brand-mark.compact { width: 26px; height: 26px; font-size: 11px; }
+.role-badge { padding: 3px 7px; border-radius: 3px; text-transform: uppercase; font-size: 10px; font-weight: 700; }
+/* Editor/viewer chip text used the dark-theme accent literal in every theme
+   (2026-09-21 contrast sweep: 1.77:1 in light). --gr-pos/--gr-accent-text are
+   the theme-aware tokens already used for this same tinted-chip-text pattern
+   elsewhere (see client_intel.css .ci-gh-chip.ETL-promote). */
+.role-badge.editor { background: color-mix(in srgb, var(--gr-pos) 16%, transparent); color: var(--gr-pos); }
+.role-badge.viewer { background: color-mix(in srgb, var(--gr-accent) 16%, transparent); color: var(--gr-accent-text); }
+.role-badge.admin { background: color-mix(in srgb, var(--amber) 16%, transparent); color: var(--amber); }
+
+.portal-layout { min-height: calc(100vh - 118px); display: grid; grid-template-columns: minmax(540px, 1fr) 310px; }
+.section-label { margin: 0 0 9px; color: var(--muted); text-transform: uppercase; font-size: 10px; font-weight: 800; }
+.tool-section { margin-top: 14px; }
+.tool-link {
+  min-height: 42px;
+  border-radius: 4px;
+  color: inherit;
+  display: flex;
+  flex: 1;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 10px;
+  text-decoration: none;
+}
+.tool-link:hover { background: var(--nav-hover); }
+.tool-link:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.tool-link.active { background: #fff3c4; color: #594300; font-weight: 700; }
+.tool-link.active .nav-state { color: #594300; }
+.nav-state { font-size: 10px; color: #91a0ab; }
+.nav-state.warning { color: var(--amber); font-weight: 700; }
+.connection-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--amber); }
+.connection-dot.online { background: #34b27b; }
+.connection-dot.offline { background: #df554c; }
+
+/* Two-level bar: pillars on top, the active pillar's tools underneath. See the
+   comment in _nav.html for why. The inactive pillars' pills stay in the DOM so
+   every route is still linked from every page. */
+.pillar-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; width: 100%; }
+.pillar-tools { margin-top: 3px; }
+/* Two classes, not one: .tool-nav-group's display is declared further down the
+   file, so a single-class rule loses the cascade at equal specificity and every
+   pillar stayed expanded. */
+.tool-nav-group.nav-collapsed { display: none; }
+.pillar-tab {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 0 9px;
+  border-radius: 4px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: 1px solid transparent;
+  transition: transform 120ms ease-out;
+}
+@media (hover: hover) and (pointer: fine) {
+  .pillar-tab:hover { color: var(--ink); background: var(--canvas); }
+}
+.pillar-tab.active { color: var(--blue); border-color: var(--line); background: var(--canvas); }
+.pillar-tab:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.pillar-tab:active { transform: scale(0.98); }
+/* Control / Analysis inside a pillar that has both. */
+.tool-nav-section {
+  color: var(--muted);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  margin: 0 1px 0 4px;
+}
+.tool-nav-group:first-child .tool-nav-section:first-child { margin-left: 0; }
+
+.tool-bar {
+  display: flex;
+  /* wrap, not nowrap: with the 13-Aug pillar grouping the admin bar is wider
+     than 1280px, and nowrap hides ~650px of pills behind a horizontal scroll
+     nobody looks for. Wrapping keeps every tool visible; .tool-nav-group is
+     inline-flex so a pillar wraps as a unit and the grouping still reads.
+     Mobile keeps nowrap+scroll on purpose -- see the max-width:720px block. */
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+  padding: 5px 12px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+  max-width: 100%;
+  overflow-x: auto;
+}
+.nav-item-wrap { display: inline-flex; align-items: center; gap: 2px; max-width: 100%; }
+.tool-bar .nav-item-wrap, .algorithm-row .nav-item-wrap { flex: 0 0 auto; }
+/* 13-Aug-2026 3-pillar restructure: pillars stay one row in the bar (never
+   three stacked rows) — each pillar is its own inline-flex group with the
+   bar's overflow-x:auto as the escape hatch if they ever stop fitting. */
+.tool-nav-group { display: inline-flex; align-items: center; gap: 4px; flex: 0 0 auto; }
+.tool-nav-sep { flex: 0 0 auto; width: 1px; height: 14px; margin: 0 3px; background: var(--line); }
+.tool-subsection { margin: 10px 0 6px 6px; font-size: 9px; }
+.tool-pill {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  /* 34px pills wrapped to three rows and cost ~143px of every page before any
+     content. 24px keeps them comfortably tappable while fitting the same set
+     into roughly one third of the height. */
+  min-height: 24px;
+  padding: 0 9px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--canvas);
+  color: var(--ink);
+  font-size: 11.5px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background .15s ease, color .15s ease, border-color .15s ease, transform 120ms ease-out;
+}
+@media (hover: hover) and (pointer: fine) {
+  .tool-pill:hover { background: var(--nav-hover); color: #fff; border-color: var(--nav-hover); }
+}
+.tool-pill.active { background: var(--blue); color: #fff; border-color: var(--blue); box-shadow: var(--shadow); }
+.tool-pill:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.tool-pill:active { transform: scale(0.98); }
+@media (prefers-reduced-motion: reduce) {
+  .tool-pill { transition: none; }
+  .primary-button:active, .secondary-button:active, .danger-button:active,
+  .tool-pill:active, .pillar-tab:active, .algorithm-button:active,
+  .candle-preset-button:active, .chip-button:active, .copy-to-chip:active,
+  .riskmt-subnav-link:active {
+    transform: none;
+  }
+}
+
+/* Admin-only rename affordance shared by every nav item (bar or side) --- */
+/* Renaming is a rare admin action, but the pencil used to sit permanently
+   between every pill -- on a 13-item bar that reads as stray glyphs and pushed
+   the strip onto a third row. Collapsed until its pill is hovered/focused. */
+.nav-edit-btn {
+  flex: 0 0 auto;
+  min-width: 0;
+  width: 0;
+  min-height: 26px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  opacity: 0;
+  overflow: hidden;
+  font-size: 12px;
+  line-height: 1;
+  transition: opacity .12s ease, width .12s ease;
+}
+.nav-item-wrap:hover .nav-edit-btn,
+.nav-item-wrap:focus-within .nav-edit-btn {
+  width: 26px;
+  min-width: 26px;
+  opacity: .65;
+}
+.nav-edit-btn:hover, .nav-edit-btn:focus-visible { width: 26px; min-width: 26px; opacity: 1; background: var(--nav-hover); color: #fff; }
+@media (prefers-reduced-motion: reduce) { .nav-edit-btn { transition: none; } }
+/* Touch has no hover to reveal it; renaming stays a desktop admin action. */
+@media (hover: none) { .nav-edit-btn { display: none; } }
+.nav-rename-input {
+  min-height: 34px;
+  width: 150px;
+  max-width: 40vw;
+  padding: 0 10px;
+  border: 1px solid var(--blue);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+}
+
+/* Algorithm selector — relocated from the old left sidebar into the
+   Configuration Console body (see templates/index.html). Same
+   .algorithm-button elements/data-* attributes portal.js already reads;
+   only the layout is horizontal now. Wraps instead of scrolling since the
+   algorithm count is small (unlike the tool bar's fixed 7-8 page links). */
+.algorithm-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 14px 22px 0; }
+.algorithm-button {
+  flex: 0 0 auto;
+  min-height: 36px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--canvas);
+  color: var(--ink);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px;
+  font-weight: 650;
+  font-size: 12.5px;
+  transition: transform 120ms ease-out;
+}
+@media (hover: hover) and (pointer: fine) {
+  .algorithm-button:hover { background: var(--nav-hover); color: #fff; border-color: var(--nav-hover); }
+}
+.algorithm-button.active { background: var(--green); color: var(--canvas); border-color: var(--green); font-weight: 700; box-shadow: var(--shadow); }
+.algorithm-button:active { transform: scale(0.97); }
+.algorithm-row-status { margin-left: auto; display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 11px; white-space: nowrap; }
+
+/* RiskMT owns two related configuration surfaces. The shared section switcher
+   lives here because Settings loads portal.css without pg_markups.css. */
+.riskmt-subnav { display: flex; gap: 6px; align-items: center; }
+.riskmt-subnav-link { display: inline-flex; align-items: center; min-height: 30px; padding: 0 11px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--ink); font-size: 12px; font-weight: 700; text-decoration: none; transition: transform 120ms ease-out; }
+@media (hover: hover) and (pointer: fine) {
+  .riskmt-subnav-link:hover { border-color: var(--blue); color: var(--blue); }
+}
+.riskmt-subnav-link.active { background: var(--green); border-color: var(--green); color: var(--canvas); }
+.riskmt-subnav-link:active { transform: scale(0.98); }
+
+.workspace { background: var(--surface); border-right: 1px solid var(--line); min-width: 0; }
+.workspace-header {
+  min-height: 92px;
+  padding: 18px 22px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 8px 16px;
+  border-bottom: 1px solid var(--line);
+}
+.workspace-heading { min-width: 0; }
+.workspace-header h1 { margin: 0; font-size: 20px; }
+.path-text { grid-column: 1 / -1; min-width: 0; margin: 0; color: var(--muted); font-family: Consolas, monospace; font-size: 11px; overflow-wrap: anywhere; }
+.workspace-header > #save-button { grid-column: 2; grid-row: 1; white-space: nowrap; }
+.workspace-utilities { grid-column: 1 / -1; display: flex; align-items: center; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
+.workspace-header-clean { min-height: 0; padding: 8px 22px 0; border-bottom: 0; display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
+.workspace-header-clean > #save-button { grid-column: auto; grid-row: auto; }
+.workspace-header-clean .workspace-utilities { grid-column: auto; margin-left: 0; }
+.workspace-header-clean .path-text { display: none; }
+.primary-button, .secondary-button, .quiet-button, .danger-button {
+  min-height: 36px;
+  border-radius: 9px;
+  padding: 0 15px;
+  border: 1px solid transparent;
+  font-weight: 650;
+}
+.primary-button { color: var(--canvas); background: var(--green); border-color: var(--green); }
+.primary-button:hover { background: var(--green-dark); }
+/* rb.css's SpecularButton mount (rb.js) writes --sb-tint-opacity:0 and
+   --sb-text-color:#f5f5f5 straight into the element's inline style (its
+   "glass over a photo/gradient" defaults); inline style beats any external
+   override of those same custom properties, so overriding the vars from here
+   cannot work. .rb-specular-button's own background/color rule is the same
+   0,1,0 specificity as .primary-button and rb.css loads after portal.css, so
+   it always won the tie -- a plain panel behind it (no backdrop) left near-
+   white text on a fully transparent fill (2026-09-21 sweep: 1.09:1 on /users
+   "Create user"). Setting background/color directly at 0,2,0 here wins on
+   specificity alone, independent of load order or the inline vars. */
+.primary-button.rb-specular-button { background: var(--green); color: var(--canvas); }
+.primary-button.rb-specular-button:hover { background: var(--green-dark); }
+.secondary-button { background: var(--surface); color: var(--ink); border-color: var(--line); }
+.quiet-button { color: var(--muted); background: transparent; border-color: var(--line); }
+.danger-button { background: var(--surface); color: var(--red); border-color: var(--red); }
+.danger-button:hover { background: rgba(239,68,68,0.12); }
+.primary-button, .secondary-button, .danger-button { transition: transform 120ms ease-out; }
+.primary-button:active, .secondary-button:active, .danger-button:active { transform: scale(0.97); }
+.full-width { width: 100%; }
+
+.u-form { padding: 16px 18px; }
+.u-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.u-actions select { min-height: 32px; border: 1px solid var(--line); border-radius: 8px; padding: 0 8px; background: var(--surface); font-size: 12px; }
+.u-actions button { min-height: 32px; padding: 0 10px; font-size: 12px; }
+
+/* Named for the toxic-monitor banner it was written for; that banner was never
+   added to a template (see static/flagged_home.js) and its .danger / -icon /
+   -text / -cta variants went with it. The base rule stays because
+   #watchlist-widget (index.html) is the one element still using it. */
+.flagged-banner { display: flex; align-items: center; gap: 12px; margin: 14px 22px 0; padding: 12px 16px; border-radius: var(--radius); text-decoration: none; border: 1px solid var(--amber); background: rgba(251,191,36,0.1); color: var(--amber); box-shadow: var(--shadow); }
+
+.notice { margin: 12px 22px 0; padding: 10px 12px; border-radius: 4px; border: 1px solid var(--green); background: rgba(34,197,94,0.1); color: #4ade80; }
+.notice.error { border-color: var(--red); background: rgba(239,68,68,0.1); color: var(--red); }
+.notice.warning { border-color: var(--amber); background: rgba(251,191,36,0.1); color: var(--amber); }
+.hidden { display: none !important; }
+#config-warnings strong { display: block; }
+#config-warnings ul { margin: 6px 0 0; padding-left: 18px; }
+#config-warnings li { margin: 2px 0; overflow-wrap: anywhere; }
+
+/* Start / Stop / Restart bar of a controllable daemon (portal.js, catalog control_capable). Badge colours follow the same tokens as role-badge. */
+.control-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 10px 22px 0; }
+.control-label { color: var(--muted); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+.control-badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 800; border: 1px solid var(--line); }
+.control-badge.running { background: color-mix(in srgb, var(--green) 16%, transparent); border-color: var(--green); color: var(--gr-pos, var(--green)); }
+.control-badge.stopped { background: color-mix(in srgb, var(--red) 14%, transparent); border-color: var(--red); color: var(--red); }
+.control-badge.unknown { background: color-mix(in srgb, var(--amber) 14%, transparent); border-color: var(--amber); color: var(--amber); }
+.control-bar button:disabled { opacity: .5; cursor: not-allowed; }
+@media (max-width: 720px) { .control-bar { padding: 10px 12px 0; gap: 6px; } .control-label { display: none; } .control-bar button { padding: 0 10px; } }
+
+.config-toolbar { min-height: 54px; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 22px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.config-toolbar input { width: min(360px, 70%); height: 36px; padding: 0 12px; border: 1px solid var(--line); border-radius: 9px; background: var(--canvas); }
+.config-toolbar input:focus-visible { outline: 2px solid var(--green); border-color: var(--green); background: var(--surface); }
+.config-toolbar span { color: var(--muted); font-size: 12px; }
+.toolbar-actions { display: flex; align-items: center; gap: 14px; }
+.table-wrap { overflow: auto; height: calc(100vh - 216px); }
+.config-table { border-collapse: collapse; width: 100%; table-layout: fixed; }
+.config-table th { position: sticky; top: 0; z-index: 1; padding: 11px 14px; text-align: left; background: var(--surface); color: var(--muted); font-size: 11px; letter-spacing: .04em; text-transform: uppercase; border-bottom: 1px solid var(--line); }
+.config-table th:nth-child(1) { width: 44%; }
+.config-table th:nth-child(2) { width: 40%; }
+.config-table th:nth-child(3) { width: 16%; }
+.config-table td { padding: 9px 14px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.setting-key { font-family: Consolas, monospace; font-size: 11px; color: var(--muted); overflow-wrap: anywhere; }
+.setting-label { font-weight: 600; margin-bottom: 2px; }
+.setting-unit { color: var(--muted); font-weight: 500; }
+.config-input { width: 100%; min-height: 31px; border: 1px solid var(--line); border-radius: 3px; padding: 5px 8px; background: var(--surface); }
+.config-input:focus-visible { outline: 2px solid var(--green); border-color: var(--green); }
+.config-input[aria-invalid="true"] { border-color: var(--red); }
+.boolean-control { display: inline-flex; align-items: center; gap: 8px; }
+.state-text { display: block; color: #7a858d; font-size: 11px; }
+.state-text.changed { color: var(--amber); font-weight: 700; }
+.original-value { display: block; margin-top: 2px; color: var(--muted); font-size: 10.5px; overflow-wrap: anywhere; }
+.revert-button { margin-top: 4px; min-height: 22px; padding: 0 7px; border: 1px solid var(--line); border-radius: 3px; background: var(--surface); font-size: 10.5px; color: var(--ink); }
+.revert-button:hover { background: var(--canvas); }
+.field-error { margin: 5px 0 0; color: var(--red); font-size: 11px; line-height: 1.4; }
+.empty-state { text-align: center; color: var(--muted); padding: 36px !important; }
+
+/* Grouped config sections ------------------------------------------------ */
+.config-groups { padding: 4px 22px 22px; }
+.config-group { margin-top: 10px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow); }
+.config-group:first-child { margin-top: 0; }
+.config-group.hidden { display: none !important; }
+.config-group-summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 14px;
+  cursor: pointer;
+  list-style: revert;
+  user-select: none;
+}
+.config-group-summary:focus-visible { outline: 2px solid var(--blue); outline-offset: -2px; }
+.config-group-name { font-weight: 700; }
+.config-group-count { color: var(--muted); font-size: 11.5px; }
+.config-group-badge { margin-left: auto; padding: 2px 8px; border-radius: 999px; background: rgba(251,191,36,0.16); color: var(--amber); font-size: 10.5px; font-weight: 700; }
+.config-group-badge.hidden { display: none; }
+.config-group[open] .config-group-summary { border-bottom: 1px solid var(--line); }
+/* Each accordion body must size to ITS OWN rows. It carries .table-wrap for the
+   horizontal-scroll/table styling, but .table-wrap also pins height to the
+   viewport — which made every section, even a one-row one, exactly 584px tall:
+   MachineGun's 45 settings became 15,995px of mostly whitespace. The outer
+   #config-groups keeps the viewport height and does the scrolling; a very long
+   section is capped so its own header stays reachable. */
+.config-group-body { overflow-x: auto; height: auto; max-height: none; }
+.config-group-body.config-group-body-tall { max-height: 60vh; overflow-y: auto; }
+.config-row.hidden { display: none; }
+
+.section-jump { display: flex; flex-wrap: nowrap; gap: 6px; padding: 8px 22px; overflow-x: auto; flex: 0 0 auto; border-bottom: 1px solid var(--line); }
+.section-jump.hidden { display: none; }
+.section-jump-chip { flex: 0 0 auto; }
+
+/* CandleTL asset-first view -----------------------------------------------
+   Asset chip list (candle-tabs, repurposed from the old M1/M5/Daily/LPTL/
+   Settings tab bar) + filter box. Desktop chips wrap naturally; phone widths
+   turn the asset list into the same compact horizontal strip as the top nav
+   so the selector does not consume several rows before the editable card. */
+.candle-tabs { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 22px; border-bottom: 1px solid var(--line); }
+.candle-tabs.hidden { display: none; }
+.candle-asset-chip { min-height: 32px; padding: 0 12px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--ink); font-weight: 650; font-size: 12.5px; display: inline-flex; align-items: center; gap: 6px; }
+@media (hover: hover) and (pointer: fine) {
+  .candle-asset-chip:hover { background: var(--canvas); }
+}
+.candle-asset-chip.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+.candle-asset-chip-badge { padding: 1px 6px; border-radius: 999px; background: rgba(251,191,36,0.16); color: var(--amber); font-size: 9.5px; font-weight: 700; }
+.candle-asset-chip-badge.hidden { display: none; }
+.candle-asset-chip.active .candle-asset-chip-badge { background: rgba(255,255,255,.9); }
+.candle-control-bar { position: sticky; top: 0; z-index: 8; display: flex; align-items: center; gap: 10px; padding: 8px 22px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--surface) 96%, transparent); backdrop-filter: blur(8px); }
+.candle-control-bar.hidden { display: none; }
+.candle-asset-filter { flex: 0 1 320px; min-width: 180px; padding: 0; }
+.candle-asset-filter.hidden { display: none; }
+.candle-asset-filter input { width: 100%; height: 34px; padding: 0 12px; border: 1px solid var(--line); border-radius: 9px; background: var(--canvas); }
+.candle-asset-filter input:focus-visible { outline: 2px solid var(--green); border-color: var(--green); background: var(--surface); }
+.candle-quick-host { min-width: 0; flex: 1 1 auto; }
+.candle-quick-presets { display: flex; flex-wrap: nowrap; align-items: center; gap: 8px; padding: 0; border-bottom: 0; min-width: 0; }
+.candle-quick-presets-label { font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: .02em; }
+.candle-quick-presets-controls { display: flex; flex-wrap: nowrap; gap: 5px; overflow-x: auto; scrollbar-width: none; }
+.candle-quick-presets-controls::-webkit-scrollbar { display: none; }
+.candle-preset-button { min-height: 28px; padding: 0 10px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--ink); font-size: 11px; font-weight: 700; transition: transform 120ms ease-out; }
+.candle-preset-button:hover:not(:disabled) { background: var(--canvas); }
+.candle-preset-button.active { background: var(--green); color: var(--canvas); border-color: var(--green); }
+.candle-preset-button:disabled { opacity: .6; cursor: not-allowed; }
+.candle-preset-button:active:not(:disabled) { transform: scale(0.98); }
+.candle-settings-button { flex: 0 0 auto; width: 34px; min-height: 34px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--muted); font-size: 15px; font-weight: 800; }
+.candle-settings-button:hover, .candle-settings-button:focus-visible { border-color: var(--green); color: var(--green); background: var(--canvas); }
+
+/* Per-asset panel: clicking a chip above renders every M1/M5/Daily/LPTL
+   threshold for that asset here, grouped by severity level so a level's
+   values read side by side instead of behind separate tabs. The field grid
+   is auto-fit, not a fixed-column table, so it reflows to fewer columns on
+   a phone rather than ever scrolling the page sideways. */
+.candle-asset-panel { padding: 2px 0 6px; }
+.candle-asset-panel-head { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 10px; }
+.candle-asset-panel-head h3 { margin: 0; font-size: 17px; }
+.candle-asset-generic { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 14px; }
+.candle-asset-generic-field { min-width: 150px; }
+.candle-level-card { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow); padding: 10px 12px; margin-top: 10px; }
+.candle-level-card:first-child { margin-top: 0; }
+.candle-level-card-head { display: flex; align-items: center; gap: 8px; }
+.candle-level-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(88px, 1fr)); gap: 8px; margin-top: 8px; }
+.candle-field { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.candle-field-label { font-size: 10.5px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: .02em; }
+.candle-field-input { width: 100%; min-width: 0; min-height: 30px; border: 1px solid var(--line); border-radius: 3px; padding: 4px 6px; background: var(--surface); font-size: 12.5px; }
+.candle-field-input:focus-visible { outline: 2px solid var(--green); border-color: var(--green); }
+.candle-field-input[aria-invalid="true"] { border-color: var(--red); }
+.candle-field.candle-field-na { color: var(--muted); }
+.candle-field-na-mark { padding: 4px 0; font-size: 12.5px; }
+.candle-field.candle-field-changed .candle-field-label { color: var(--amber); }
+.candle-field-revert { min-height: 18px; padding: 0 5px; font-size: 9.5px; border: 1px solid var(--line); border-radius: 3px; background: var(--surface); color: var(--ink); align-self: flex-start; }
+.candle-field-revert.hidden { display: none; }
+.candle-field-dangerous .candle-field-input { box-shadow: inset 3px 0 0 var(--red); }
+.candle-field-hide-toggle { min-height: 18px; padding: 0 5px; font-size: 9.5px; align-self: flex-start; }
+.candle-field.row-unpublished { opacity: .55; }
+.candle-general-groups { margin-top: 18px; }
+
+/* Bulk "copy this asset to other assets" tool -- reuses the per-field
+   copy-to-panel/copy-to-grid/copy-to-actions look (below); only the
+   M1/M5/Daily/LPTL part checkboxes are new here. */
+.candle-copy-panel { margin: 4px 0 14px; }
+.candle-copy-parts { display: flex; flex-wrap: wrap; gap: 14px; margin: 4px 0 10px; }
+.candle-copy-parts label { display: flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 650; }
+
+/* Colour-coded severity badge for CandleTL M1/M5/Daily/LPTL level rows — family only
+   (yellow/orange/red/dark-red/dark-black), same palette as .level-chip
+   above, never inline style. */
+.level-badge { display: inline-block; padding: 2px 9px; border-radius: 999px; font-weight: 700; font-size: 11px; color: #2a2200; }
+.level-badge-yellow { background: #f2c11d; }
+.level-badge-orange { background: #e08a1e; color: #fff; }
+.level-badge-red { background: #d13b3b; color: #fff; }
+.level-badge-dark-red { background: #7a1c1c; color: #fff; }
+.level-badge-dark-black { background: #2b3145; color: #fff; }
+.level-badge-neutral { background: #e8edf2; color: #425267; }
+
+/* Publish control (admin-only hide/show toggles) -------------------------
+   One shared button look at row and group level: plain = visible to
+   viewers, -active = hidden, -partial = a group with a mix of hidden and
+   visible keys underneath it. Dimming (.row-unpublished) is cosmetic only
+   for the admin's own view — the server is what actually keeps a hidden
+   key out of a non-admin payload. */
+.hide-toggle-button { margin-top: 4px; min-height: 22px; padding: 0 7px; border: 1px solid var(--line); border-radius: 3px; background: var(--surface); font-size: 10.5px; color: var(--ink); }
+.hide-toggle-button:hover { background: var(--canvas); }
+.hide-toggle-button.hide-toggle-active { background: rgba(239,68,68,0.16); border-color: var(--red); color: color-mix(in srgb, var(--red) 70%, var(--gr-text)); }
+.hide-toggle-button.hide-toggle-partial { background: rgba(251,191,36,0.16); border-color: var(--amber); color: var(--amber); }
+.group-hide-toggle { margin-top: 0; }
+.config-row.row-unpublished { opacity: 0.55; }
+.config-row.row-unpublished .setting-label { text-decoration: line-through; text-decoration-color: var(--red); }
+
+@media (prefers-reduced-motion: reduce) {
+  .config-group-summary, .chip-button, .revert-button { transition: none; }
+}
+
+.import-file-input { display: none; }
+.link-button { border: 0; background: transparent; color: var(--blue); font-weight: 650; padding: 0; }
+.link-button:hover { text-decoration: underline; }
+
+/* Per-field copy-to: an inline expansion row under a single LPTL setting,
+   scoped to one level+param. */
+.config-row.lptl-row .state-text { display: inline-block; vertical-align: middle; line-height: 26px; white-space: nowrap; }
+.copy-to-button { display: inline-flex; align-items: center; min-height: 26px; margin: 0; padding: 0 5px; font-size: 10px; line-height: 1; vertical-align: middle; white-space: nowrap; }
+.copy-to-row > td { padding: 0 14px 12px; background: var(--canvas); }
+.copy-to-panel { border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; background: var(--surface); }
+.copy-to-head { margin: 0 0 8px; font-size: 12.5px; font-weight: 650; }
+.copy-to-empty { margin: 0; color: var(--muted); font-size: 12px; }
+.copy-to-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px; max-height: 180px; overflow: auto; border: 1px solid var(--line); border-radius: 6px; padding: 8px; }
+.copy-to-item { display: flex; align-items: center; gap: 7px; padding: 4px 6px; border-radius: 4px; font-size: 12px; cursor: pointer; }
+@media (hover: hover) and (pointer: fine) {
+  .copy-to-item:hover { background: var(--canvas); }
+}
+.copy-to-symbol { font-family: Consolas, monospace; font-weight: 700; }
+.copy-to-current { margin-left: auto; color: var(--muted); font-variant-numeric: tabular-nums; }
+.copy-to-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 10px; }
+.copy-to-chip { min-height: 28px; padding: 0 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); font-size: 12px; font-weight: 650; transition: transform 120ms ease-out; }
+.copy-to-chip:hover { background: var(--canvas); }
+.copy-to-chip:active { transform: scale(0.98); }
+.copy-to-apply { margin-left: auto; }
+
+.import-panel { margin: 14px 22px 0; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow); }
+.matrix-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; padding: 14px 16px 4px; }
+.matrix-sub { margin: 4px 0 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
+
+.chip-button { min-height: 28px; padding: 0 10px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); font-size: 11.5px; transition: transform 120ms ease-out; }
+.chip-button:hover { background: var(--canvas); }
+.chip-button:active { transform: scale(0.98); }
+
+.setting-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.setting-row select, .setting-row input[type="number"] { min-height: 36px; border: 1px solid var(--line); border-radius: 9px; padding: 0 10px; background: var(--surface); }
+.setting-row input[type="number"] { width: 160px; }
+.matrix-restart-note { margin: 6px 0 0; color: var(--muted); font-size: 11.5px; line-height: 1.5; }
+
+.import-diff-wrap { margin: 0 16px 12px; width: auto; height: auto; max-height: 260px; border: 1px solid var(--line); border-radius: 6px; }
+.import-check-col { width: 34px; }
+.import-panel .setting-row { padding: 0 16px 14px; }
+
+/* Sub-label under a .config-group's summary (currently just "Frequency caps"
+   on the James Bond tab) -- same text treatment as .matrix-sub, positioned
+   for this context instead of .matrix-head's flex row. */
+.config-group-note { margin: 8px 14px 10px; }
+
+/* The import diff table reuses .config-table (table-layout:fixed, 3 columns
+   worth of width rules: 48/38/14%) but actually has 4 columns. .import-check-col
+   above loses the cascade to .config-table th:nth-child(1) (same specificity,
+   defined earlier in the file), so the 4th "Incoming" column -- the one value
+   the user is actually approving -- got ~0 width (H4 in the review). These
+   rules match .config-table's specificity exactly and come later in the
+   file, so they win for .import-diff-table without touching the shared
+   3-column table elsewhere. */
+.import-diff-table th:nth-child(1) { width: 34px; }
+.import-diff-table th:nth-child(2) { width: 22%; }
+.import-diff-table th:nth-child(3) { width: 37%; }
+.import-diff-table th:nth-child(4) { width: 37%; }
+
+.review-diff-table th:nth-child(1) { width: 40%; }
+.review-diff-table th:nth-child(2) { width: 30%; }
+.review-diff-table th:nth-child(3) { width: 30%; }
+/* Long values (excluded-login lists, group masks) must wrap inside their cell, not run into the next column. */
+.review-diff-table td { overflow-wrap: anywhere; }
+
+.review-dialog { width: min(680px, calc(100vw - 40px)); max-height: min(640px, calc(100vh - 60px)); padding: 0; border: 0; border-radius: var(--radius); box-shadow: 0 20px 60px rgba(0,0,0,.35); }
+.review-dialog::backdrop { background: rgba(15,20,28,.55); }
+.review-dialog-form { display: flex; flex-direction: column; max-height: min(640px, calc(100vh - 60px)); }
+.review-dialog h2 { margin: 0; padding: 18px 20px 0; font-size: 17px; }
+.review-dialog #review-summary { margin: 6px 20px 0; }
+.review-diff-wrap { margin: 12px 20px 0; width: auto; height: auto; max-height: 340px; border: 1px solid var(--line); border-radius: 6px; }
+.review-actions { padding: 14px 20px; border-top: 1px solid var(--line); justify-content: flex-end; }
+
+.activity-panel { background: var(--canvas); min-width: 0; }
+.tabs { height: 48px; display: flex; align-items: end; padding: 0 14px; border-bottom: 1px solid var(--line); background: var(--surface); }
+.tab-button { height: 38px; padding: 0 12px; border: 0; background: transparent; color: var(--muted); border-bottom: 2px solid transparent; }
+.tab-button.active { color: var(--green-dark); border-bottom-color: var(--green); font-weight: 700; }
+.activity-list { height: calc(100vh - 106px); overflow: auto; padding: 10px 14px; }
+.activity-item { padding: 12px 2px; border-bottom: 1px solid var(--line); }
+.activity-item strong { display: block; font-size: 12px; }
+.activity-meta { color: var(--muted); font-size: 11px; margin-top: 4px; line-height: 1.45; overflow-wrap: anywhere; }
+.rollback-button { margin-top: 8px; border: 1px solid var(--line); border-radius: 3px; background: var(--surface); min-height: 28px; padding: 0 8px; font-size: 11px; }
+
+.login-page { min-height: 100vh; background: #192126; }
+.login-shell { min-height: 100vh; display: grid; place-items: center; padding: 24px; }
+.login-page { background: linear-gradient(140deg, #16202e 0%, #1c2b40 100%); }
+.login-panel { width: min(400px, 100%); background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 32px; border-top: 4px solid var(--green); box-shadow: 0 20px 60px rgba(0,0,0,.35); }
+
+/* Controller canvas — same radial-gradient backdrop as Client 360's .ci-body,
+   scoped to body.controller-page only (index.html) so it can never leak onto
+   the other 8 templates that also load this stylesheet. */
+body.controller-page {
+  background:
+    radial-gradient(1200px 400px at 80% -10%, rgba(168,85,247,0.08) 0%, transparent 60%),
+    var(--canvas);
+}
+.login-panel h1 { margin: 8px 0; font-size: 25px; }
+.eyebrow { color: var(--green-dark); font-size: 11px; text-transform: uppercase; font-weight: 800; margin: 18px 0 0; }
+.login-copy { color: var(--muted); line-height: 1.5; }
+.login-panel .notice { margin: 14px 0; }
+.login-form { display: grid; gap: 7px; margin: 20px 0 10px; }
+.login-form label { font-size: 12px; font-weight: 700; margin-top: 5px; }
+/* Radius, padding and the focus ring were aligned with the rest of the portal
+   (was a 4px corner, the last one left). The BORDER deliberately stays on the
+   control grey var(--line) rather than the lighter var(--line): an adversarial pass
+   measured --line at 1.15:1 against the field fill, which left two empty
+   stacked credential fields nearly invisible until focused. Consistency is not
+   worth a sign-in box you have to hunt for. Same grey as .secondary-button
+   (~line 146), so it is the portal's existing control border, not a one-off. */
+.login-form input { height: 38px; padding: 0 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+.login-form input:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; border-color: var(--blue); background: var(--surface); }
+.login-form button { margin-top: 10px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); }
+
+/* housecleaning.html and candletl_showcase.html have no sidebar (their
+   tool nav lives in the shared top bar like everywhere else) — one column. */
+.housecleaning-layout { grid-template-columns: minmax(0, 1fr); }
+
+
+@media (max-width: 1050px) {
+  .portal-layout { grid-template-columns: minmax(480px, 1fr); }
+  .activity-panel { grid-column: 1 / -1; border-top: 1px solid var(--line); }
+  .activity-list { height: 280px; }
+  .hc-kpis { grid-template-columns: repeat(3, 1fr); }
+  .hc-kpis > div:nth-child(3n) { border-right: 0; }
+  .coordinator-lane { grid-template-columns: 40px 1fr; }
+  .coordinator-flow { grid-column: 1 / -1; }
+  .algorithm-row { gap: 6px; padding: 12px 16px 0; }
+  .algorithm-button { min-height: 34px; padding: 0 11px; font-size: 12px; }
+}
+@media (max-width: 720px) {
+  /* Shared phone density: roughly 15% tighter without CSS zoom, which would
+     distort chart canvases, iframe content, and fixed overlays on other pages. */
+  :root { --mobile-control-height: 40px; }
+  body { font-size: 12px; }
+  .app-bar { height: auto; min-height: 50px; padding: 8px 10px; gap: 8px; flex-wrap: wrap; }
+  .brand-mark.compact { width: 28px; height: 28px; font-size: 11px; }
+  .brand-row strong { font-size: 13px; }
+  .environment { font-size: 10px; }
+  .portal-layout { display: block; }
+  /* Algorithm choice follows the page-navigation grammar: one compact,
+     swipeable strip. This saves vertical space and makes the green active pill
+     exactly the same size as a navigation pill. */
+  .algorithm-row {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    gap: 6px;
+    padding: 8px 10px 0;
+  }
+  .algorithm-row::-webkit-scrollbar { display: none; }
+  .algorithm-button {
+    flex: 0 0 auto;
+    width: auto;
+    min-height: 34px;
+    padding: 0 13px;
+    font-size: 11.5px;
+    justify-content: center;
+    text-align: center;
+    white-space: nowrap;
+  }
+  .algorithm-row-status { flex: 0 0 auto; margin-left: 2px; font-size: 10px; white-space: nowrap; }
+
+  .table-wrap { height: 58vh; }
+  /* The page itself is the mobile scroller. A viewport-height config wrapper
+     leaves a large blank card below short groups before Versions/Audit. */
+  #config-groups.table-wrap { height: auto; overflow: visible; }
+  .config-group-body.table-wrap { height: auto; }
+  .config-groups { padding: 4px 12px 18px; }
+  .config-group-summary { min-height: var(--mobile-control-height); padding: 0 12px; }
+  .config-toolbar { padding: 10px 12px; }
+  .config-toolbar input { width: 100%; }
+  .toolbar-actions { width: 100%; gap: 12px; }
+  .config-table th:nth-child(1) { width: 40%; }
+  .config-table th:nth-child(2) { width: 40%; }
+  .config-table th:nth-child(3) { width: 20%; }
+  .config-table th, .config-table td { padding: 8px; }
+  .config-input { min-width: 0; max-width: 100%; }
+  .housecleaning-layout { display: block; }
+  .hc-heading { display: block; }
+  .hc-actions { margin-top: 12px; }
+  .hc-kpis { grid-template-columns: repeat(2, 1fr); }
+  .hc-kpis > div:nth-child(3n) { border-right: 1px solid var(--line); }
+  .hc-kpis > div:nth-child(2n) { border-right: 0; }
+  .hc-delete-grid { grid-template-columns: 1fr; }
+  .hc-panel { padding: 12px; }
+  .workflow-overview, .workflow-board { margin: 12px; }
+  .workflow-kpis { grid-template-columns: repeat(2, 1fr); }
+  .workflow-kpis > div:nth-child(2n) { border-right: 0; }
+  .workflow-jobs { grid-template-columns: 1fr; padding: 8px; }
+  .job-pipeline { overflow-x: auto; }
+  .workflow-facts { grid-template-columns: 88px minmax(0, 1fr); }
+
+  /* Compact 40px touch target -- shared button classes measured
+     min-height:36px (line ~179) and login-form inputs measured height:38px
+     (line ~416). Scoped to this media query only: every other page's buttons
+     and inputs already flow through these same shared classes, so this one
+     rule lifts touch targets portal-wide on mobile without a desktop change
+     or a second, page-specific override anywhere else. */
+  .primary-button, .secondary-button, .quiet-button, .danger-button { min-height: var(--mobile-control-height); }
+  .login-form input { height: var(--mobile-control-height); }
+  /* login-panel's fixed 32px padding + place-items:center from .login-shell
+     leaves little room on a 375px viewport; tighten to the 8px grid. */
+  .login-shell { padding: 16px; }
+  .login-panel { padding: 24px 20px; }
+  /* Compact 40px touch target -- index.html controls not covered by
+     the shared button classes above: algorithm switcher, expand/collapse/
+     restart links, config search, versions/audit tabs. */
+  .link-button, .tab-button, #config-search, .candle-asset-chip { min-height: var(--mobile-control-height); }
+  .candle-control-bar { top: 0; gap: 7px; padding: 8px 12px; align-items: stretch; overflow: hidden; }
+  .candle-asset-filter { flex: 0 0 150px; min-width: 0; }
+  .candle-asset-filter input { height: 34px; }
+  .candle-quick-host { flex: 1 1 auto; min-width: 0; }
+  .candle-quick-presets { gap: 5px; height: 34px; }
+  /* The (i) itself stays visible on mobile (owner, r14) -- only the "Quick
+     setting" text label collapses to save width. */
+  .candle-quick-presets-label { display: none; }
+  .candle-quick-presets-controls { align-items: center; }
+  .candle-preset-button { min-height: 32px; padding: 0 11px; }
+  .candle-settings-button { width: 34px; min-height: 34px; font-size: 14px; }
+  .candle-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 8px 12px;
+    scrollbar-width: none;
+  }
+  .candle-tabs::-webkit-scrollbar { display: none; }
+  .candle-asset-chip { flex: 0 0 auto; min-height: 34px; padding: 0 11px; font-size: 11.5px; }
+  /* LPTL's Copy is a secondary inline row action. It stays beside Current so
+     it cannot make every X/Y/Z row taller than the M1/M5 threshold rows. */
+  .config-row.lptl-row .copy-to-button { min-height: 26px; }
+
+  /* Clean Algo Config header: selected algo is already visible in the selector;
+     keep only the primary action and small admin utilities. */
+  .workspace-header { padding: 12px 10px; gap: 7px 9px; }
+  .workspace-header-clean { padding: 8px 12px 0; justify-content: flex-end; }
+  .workspace-heading .section-label { margin-bottom: 5px; }
+  .workspace-header h1 { font-size: 18px; }
+  .workspace-header > #save-button { min-height: var(--mobile-control-height); padding: 0 10px; font-size: 11.5px; }
+  .path-text { max-height: 2.8em; overflow: hidden; line-height: 1.4; }
+  .workspace-utilities { justify-content: flex-start; gap: 6px; }
+  .workspace-utilities .secondary-button { min-height: var(--mobile-control-height); padding: 0 9px; font-size: 11.5px; }
+
+  .section-jump { padding: 8px 12px; scrollbar-width: none; }
+  .section-jump::-webkit-scrollbar { display: none; }
+
+  /* Page changes are a natural horizontal swipe on phone; configuration cards
+     themselves remain visible in the page rather than becoming another strip. */
+  /* Column, not a single nowrap line: .tool-bar holds TWO .pillar-row strips
+     (pillars, then that pillar's tools). Nowrap put them side by side and
+     squeezed the pillar strip to ~250px, clipping the active pillar mid-word.
+     Each strip is its own horizontal scroller (rules below). */
+  .tool-bar { flex-direction: column; align-items: stretch; overflow-x: hidden; overflow-y: hidden; gap: 6px; padding: 8px 10px; scrollbar-width: none; }
+  .tool-bar::-webkit-scrollbar { display: none; }
+  .tool-bar .nav-item-wrap { flex: 0 0 auto; }
+  .tool-bar .tool-pill { width: auto; min-height: 34px; padding: 0 13px; font-size: 11.5px; white-space: nowrap; }
+
+  /* Same horizontal-scroll grammar as .tool-bar above -- the pillar strip
+     was still wrapping to 2-3 lines per pillar on a phone (~110-160px of
+     vertical space before any page content) because it kept the desktop
+     flex-wrap unconditionally. */
+  .pillar-row { flex: 0 0 auto; width: 100%; flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; }
+  .pillar-row::-webkit-scrollbar { display: none; }
+  .pillar-tab { flex: 0 0 auto; white-space: nowrap; }
+}
+
+.review-restart-choice { border: 0; margin: 0 0 10px; padding: 10px 12px; border-radius: 8px; background: var(--canvas); color: var(--ink); }
+.review-restart-choice legend { padding: 0 4px; font-weight: 700; font-size: 13px; }
+.review-restart-choice label { display: block; margin-top: 6px; font-size: 13px; }
+
+/* Dangerous-key confirmation (schema.py AlgorithmSpec.dangerous_keys, today
+   RiskMT's APPLY_SPREAD_TO_EXISTING_GROUP / SIMULATION_MODE) -- visual
+   legibility only. The actual gate is server-side in agent.py's
+   apply_config, which refuses the write without a matching per-key
+   acknowledgement regardless of anything below. */
+.danger-flag { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 999px; background: rgba(239,68,68,0.16); color: color-mix(in srgb, var(--red) 70%, var(--gr-text)); font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .03em; vertical-align: middle; }
+.config-row.config-row-dangerous { background: rgba(239,68,68,0.06); box-shadow: inset 3px 0 0 var(--red); }
+.review-danger-warnings { margin: 12px 20px 0; padding: 10px 12px; border: 1px solid var(--red); border-radius: 8px; background: rgba(239,68,68,0.08); }
+.review-danger-warnings.hidden { display: none; }
+.review-danger-item { display: flex; align-items: flex-start; gap: 8px; margin-top: 8px; font-size: 12.5px; color: color-mix(in srgb, var(--red) 70%, var(--gr-text)); line-height: 1.4; }
+.review-danger-item:first-child { margin-top: 0; }
+.review-danger-item input { margin-top: 3px; flex: none; }
+.review-danger-item span { min-width: 0; overflow-wrap: anywhere; }
+.review-diff-table tr.review-row-dangerous td { background: rgba(239,68,68,0.08); }
+.review-diff-table tr.review-row-dangerous .setting-key { color: color-mix(in srgb, var(--red) 70%, var(--gr-text)); font-weight: 700; }
+
+/* UI/UX Globals */
+/* .info-icon moved to static/shell.css (2026-09-28, shared (i) component) --
+   the old rule here conflicted with it (same class, lower specificity than
+   shell.css's since shell.css loads after this file, but duplicate/drifting
+   rules are worse than one owner). Do not re-add it here. */
+/* .ci-multi-account-banner removed 2026-09-11: dead rule, referenced --ci-*
+   tokens defined only in client_intel.css and no template/JS ever used the
+   class (grepped templates/ and static/*.js). Re-add scoped to portal-wide
+   tokens if a page outside the Client 360 family needs this banner. */
+
+/* --- Configuration Console density pass, 2026-09-09 ---------------------
+   Measured before: 390px before the first setting, 50px rows (18 per screen),
+   a 310px sidebar holding one sentence, and the SETTING/VALUE/STATE header
+   repeated inside every collapsible group. */
+
+/* The versions/audit rail is a reference panel, not a co-equal column. */
+.portal-layout { grid-template-columns: minmax(540px, 1fr) 232px; }
+
+/* Rows: the input already carries its own 31px box; 9px of cell padding on top
+   of that made every setting 50px tall. */
+.config-table td { padding: 3px 10px; }
+.config-table th { padding: 5px 10px; font-size: 10.5px; }
+.config-input { min-height: 26px; padding: 3px 7px; }
+.setting-label { margin-bottom: 0; font-size: 12.5px; }
+.setting-unit { font-size: 11px; }
+.state-text, .original-value { font-size: 11px; }
+
+/* Group headers stack up fast when a config has a dozen sections. */
+.config-group-title, .config-group-header { padding-top: 6px; padding-bottom: 6px; }
+.config-group-count { font-size: 10.5px; }
+
+.workspace-header { padding-top: 8px; padding-bottom: 8px; }
+.workspace-header h1 { font-size: 16px; }
+.algorithm-row { padding: 8px 16px 0; gap: 6px; }
+.algorithm-button { min-height: 28px; padding: 0 11px; font-size: 12px; }
+
+/* --- Control console visual grammar pass (2026-09-21) ---------------------
+   Align Algo Config / CandleTL Control with the Analysis pages' card system
+   (algo_activity.css's aa-head/aa-box, client_intel.css's ci-card/ci-table):
+   a page head (title+subtitle left, actions right), rounded translucent
+   cards with a gap between them so the shared GhostFibers/radial-gradient
+   page backdrop (body.controller-page, ~line 606) shows through, and a
+   ci-table-matching header tone (fixed above). Presentation only -- every
+   id/class/data-* the JS reads is untouched; see templates/index.html for
+   the (pure relocation) markup this styles. Scoped to .controller-page /
+   #portal so nothing leaks onto the other 8 pages that load this sheet. */
+
+.controller-page #portal.portal-layout {
+  max-width: 1520px;
+  margin: 0 auto;
+  padding: 20px 22px 26px;
+  gap: 16px;
+  align-items: start;
+}
+
+/* Opaque card so the title sits above the page's decorative full-page
+   background effect (rb/ghost_fibers.js), which never re-themes for light
+   mode -- without this, dark title text was unreadable on that still-dark
+   background in light mode. Same fix as algo_activity.css / algo_analysis.css
+   .aa-head. */
+.cc-head { grid-column: 1 / -1; display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 18px; }
+.cc-head-text { min-width: 0; }
+.cc-title { margin: 0; color: var(--ink); font-size: clamp(22px, 2vw, 28px); line-height: 1.1; letter-spacing: -.025em; }
+.cc-head-actions { display: flex; align-items: center; gap: 14px; }
+.cc-head-actions .algorithm-row-status { margin-left: 0; }
+/* Reset the old edge-to-edge header bar chrome now that this block lives in
+   the page head instead of stacked above the settings card -- the base
+   .workspace-header-clean rule (~line 304, kept intact for the pinned
+   selfcheck regex) still applies first; this only wins on placement. */
+.cc-head-actions .workspace-header.workspace-header-clean { padding: 0; min-height: 0; gap: 8px; }
+
+.controller-page .workspace {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.controller-page .activity-panel {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.controller-page .activity-panel .tabs { background: var(--surface); }
+
+/* Equal-height cards (H1, 2026-09-21 audit): .workspace and .activity-panel
+   are side-by-side grid siblings that both start directly under .cc-head, at
+   the same Y -- but each one's INNER scrollable element (#config-groups /
+   .activity-list) used to carry its OWN independently-guessed
+   calc(100vh - Npx) offset (296 vs 256), with no relation to how much chrome
+   (watchlist banner, warnings, the algorithm row + toolbar...) actually sat
+   above it. That made the two cards' borders land at different heights --
+   measured at 1440x900 with the watchlist banner showing: workspace 827px
+   tall vs activity-panel 693px, and the taller one pushed the whole PAGE into
+   a ~96px vertical scroll that was never supposed to exist (only the cards'
+   own bodies were meant to scroll). Sizing both CARDS to the same height here
+   instead, then letting each one's scrollable body flex to fill whatever
+   chrome-adjusted space is left inside it, keeps the two borders aligned
+   regardless of which optional banners/notices are showing in either card. */
+@media (min-width: 1051px) {
+  .controller-page .workspace,
+  .controller-page .activity-panel {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 170px);
+  }
+  .controller-page .activity-list { height: auto; flex: 1 1 auto; min-height: 0; }
+  .controller-page #config-groups.table-wrap { height: auto; flex: 1 1 auto; min-height: 0; }
+}
+
+@media (max-width: 720px) {
+  .controller-page #portal.portal-layout { padding: 12px 10px 18px; gap: 10px; }
+  .cc-head { flex-direction: column; align-items: stretch; gap: 8px; }
+  .cc-head-actions { justify-content: space-between; }
+  .cc-title { font-size: 19px; }
+}
+
+</style>
+  <style>/* login.css */
+/* Dark glass sign-in redesign for /login.
+   Loads AFTER portal.css (see login.html <head> order) so these rules win on
+   equal specificity without editing portal.css itself. Reuses portal.css's
+   existing .login-page/.login-shell/.login-panel/.login-form/etc. class names
+   and its shared reset (box-sizing, button/input font, focus-visible) --
+   only the visual theme changes here. */
+
+.login-page {
+  background: #0a0a0c;
+  color: #fafafa;
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Strands WebGL canvas mounts into this div (see login_strands.js). Fixed and
+   inert so it never intercepts clicks or affects layout/scroll. */
+.login-strands-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+.login-strands-bg canvas { display: block; width: 100%; height: 100%; }
+
+.login-brand {
+  position: fixed;
+  top: 24px;
+  left: 24px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.login-brand .brand-mark { width: 30px; height: 30px; border-radius: 8px; font-size: 12px; }
+.login-brand-name { font-size: 15px; font-weight: 600; color: #fafafa; }
+
+.login-shell {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: none; /* portal.css puts a gradient here; the Strands canvas is the background now */
+}
+
+.login-panel {
+  width: min(400px, 100%);
+  box-sizing: border-box;
+  padding: 36px 34px 30px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-top: 1px solid rgba(255, 255, 255, 0.14); /* overrides portal.css's 4px green top border */
+  background: rgba(24, 24, 27, 0.42);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  /* Card fill is intentionally translucent (spec: rgba(24,24,27,0.42)) so the
+     Strands animation reads through it -- a bright strand can still pass
+     directly behind the text. A shared text-shadow keeps copy legible in
+     that case without darkening the glass itself. */
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.55);
+}
+
+.login-panel .eyebrow { color: #c4c4c8; margin: 0 0 6px; }
+.login-panel h1 { margin: 0 0 6px; font-size: 20px; font-weight: 600; color: #fafafa; }
+.login-panel .login-copy { color: #a1a1aa; margin: 0 0 22px; }
+.login-form-title { margin: 0 0 14px; font-size: 26px; font-weight: 600; color: #fafafa; }
+.login-panel .notice { margin: 0 0 14px; }
+
+.login-form { display: grid; gap: 7px; margin: 0 0 14px; }
+.login-form label { font-size: 13px; font-weight: 500; color: #d4d4d8; margin-top: 8px; }
+.login-form label:first-child { margin-top: 0; }
+.login-form input {
+  height: 46px;
+  padding: 0 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.06);
+  color: #fafafa;
+}
+.login-form input::placeholder { color: #86868f; }
+.login-form input:focus-visible {
+  outline: 2px solid var(--blue, #2f6df6);
+  outline-offset: 2px;
+  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.login-panel .primary-button {
+  margin-top: 10px;
+  height: 48px;
+  border: 0;
+  border-radius: 12px;
+  background: #fafafa;
+  color: #18181b;
+  font-size: 15px;
+  font-weight: 600;
+}
+.login-panel .primary-button:hover { background: #e4e4e7; }
+
+.login-panel .secondary-button {
+  margin-top: 4px;
+  height: 44px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.06);
+  color: #fafafa;
+}
+.login-panel .secondary-button:hover { background: rgba(255, 255, 255, 0.1); }
+
+@media (max-width: 480px) {
+  .login-shell { padding: 16px; }
+  .login-panel { padding: 24px 20px; }
+  .login-brand { top: 16px; left: 16px; }
+}
+
+.login-request-access {
+  margin: 14px 0 0;
+  text-align: center;
+  font-size: 13px;
+  color: #a1a1aa;
+}
+.login-request-access a {
+  color: #fafafa;
+  font-weight: 600;
+  text-decoration: none;
+}
+.login-request-access a:hover { text-decoration: underline; }
+
+</style>
+  <style>/* access.css */
+/* /access -- the device-approval page. It IS the login page (templates/
+   access.html loads login.css + the Strands background, same fixed-dark glass
+   look); this file only adds what the request box needs beyond the sign-in box. */
+
+.access-state.hidden { display: none; }
+
+.login-form textarea {
+  min-height: 84px;
+  padding: 11px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.06);
+  color: #fafafa;
+  font: inherit;
+  resize: vertical;
+}
+.login-form textarea:focus-visible {
+  outline: 2px solid var(--blue, #2f6df6);
+  outline-offset: 2px;
+  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.access-spinner {
+  width: 28px;
+  height: 28px;
+  margin: 4px auto 18px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.16);
+  border-top-color: #fafafa;
+  animation: access-spin 0.9s linear infinite;
+}
+@keyframes access-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .access-spinner { animation-duration: 2.4s; } }
+
+/* "Sign in with an account" -- the login page's secondary button, as a link. */
+.login-panel a.access-login {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+</style>
+  
+<style>
+#demo-banner{position:fixed;top:0;left:0;right:0;height:22px;line-height:22px;z-index:2147483000;text-align:center;
+  font:600 11px/22px system-ui,-apple-system,Segoe UI,sans-serif;letter-spacing:.08em;color:#1a1300;background:#fbbf24;
+  box-shadow:0 1px 4px rgba(0,0,0,.35);pointer-events:none}
+body{padding-top:22px}
+@media (max-width:998px){.shell-sidebar{top:calc(var(--shell-topbar-h) + 22px)}}
+.shell-toasts{top:calc(var(--shell-topbar-h) + 30px)}
+</style>
+<script>window.__ROUTES={"/login": "login.html", "/": "index.html", "/users": "users.html", "/build-paths": "build_paths.html", "/pg-markups": "pg_markups.html", "/manual-level": "manual_level.html", "/group-spread": "group_spread.html", "/housecleaning": "housecleaning.html", "/candletl-showcase": "candletl_showcase.html", "/client-intel": "client360.html", "/watchlist": "watchlist.html", "/hsb-pov": "hsb_pov.html", "/wd-check": "wd_check.html", "/wd-approvals": "wd_approvals.html", "/cra-model": "cra_model.html", "/cra-analysis": "cra_analysis.html", "/morning-digest": "morning_digest.html", "/algo-activity": "algo_activity.html", "/growth": "growth.html", "/top10": "top10.html", "/open-lots": "open_lots.html", "/catches": "catches.html", "/news": "news.html", "/notifications": "notifications.html", "/risk-analysis": "risk_analysis.html", "/promotion-analysis": "promotion_analysis.html", "/access": "access.html", "/toxic-monitor": "growth.html?pg=F1,F3,F5", "/logout": "login.html", "/viewer": "index.html"};</script>
+<script>/* mock.js */
+/* Portal frontend-dummy kit: shared mock framework.  Injected into <head> of every exported page BEFORE the portal's own scripts.
+   - window.__mock.register(method, regex, handlerOrJSON)   method: "GET"|"POST"|"PUT"|"DELETE"|"PATCH"|"*"
+       regex is matched against the URL PATH (no query string), e.g. /^\/api\/news$/ ; groups -> ctx.params
+       handler(ctx) may be async; ctx = { method, url, path, query (URLSearchParams), params[], body (parsed JSON or text),
+       headers, data() -> Promise of this page's embedded payload }.  Return a plain object (-> 200 JSON),
+       __mock.reply(body, status) for another status, or undefined (-> {}).  A later registration wins over an earlier one.
+   - window.__mock.data()  -> Promise of the payload dict that build_page.py embedded (pages/<slug>.py payload()).
+   - Unknown /api/ calls answer {} and print  console.warn("[mock] unmocked API call: GET /api/x")  (also in __mock.missing).
+   - fetch and XMLHttpRequest are both covered.  Non-/api/ requests go to the original fetch.
+   Also here (all documented in KIT_README.md): history.pushState/replaceState guard for file://, link/form interception that maps
+   portal paths ("/news") to the sibling files ("news.html"), and default handlers for the shell (bell, watch chip, csrf, labels). */
+(function () {
+  "use strict";
+  if (window.__mock) return;
+
+  var prevFetch = window.fetch ? window.fetch.bind(window) : null;
+  // an older export (client360.html) already installed its own fetch mock: unhandled /api/ calls fall through to it instead of {}
+  var prevIsMock = !!prevFetch && !/\[native code\]/.test(Function.prototype.toString.call(window.fetch));
+  var handlers = [];
+  var missing = [];
+  var dataPromise = null;
+
+  function reply(body, status, headers) { return { __reply: true, body: body, status: status || 200, headers: headers || null }; }
+
+  function register(method, re, h) {
+    if (!(re instanceof RegExp)) re = new RegExp(String(re));
+    handlers.unshift({ m: method === "*" ? null : String(method).toUpperCase(), re: re, h: h });
+  }
+
+  // ---- embedded payload: <script id="__mock-data" data-enc="gz|json"> (gzip+base64 for big payloads) --------------------------
+  function data() {
+    if (dataPromise) return dataPromise;
+    dataPromise = (async function () {
+      var el = document.getElementById("__mock-data");
+      if (!el) return {};
+      var txt = el.textContent.trim();
+      if (!txt) return {};
+      if (el.getAttribute("data-enc") !== "gz") return JSON.parse(txt);
+      var bin = Uint8Array.from(atob(txt), function (c) { return c.charCodeAt(0); });
+      var stream = new Blob([bin]).stream().pipeThrough(new DecompressionStream("gzip"));
+      return JSON.parse(await new Response(stream).text());
+    })();
+    return dataPromise;
+  }
+
+  // ---- dispatch ----------------------------------------------------------------------------------------------------------
+  function internalPath(rawUrl) {
+    var u;
+    // A site-absolute path ("/api/x") must NOT be resolved against a file:// base: it would keep the drive letter (file:///C:/api/x).
+    if (typeof rawUrl === "string" && rawUrl.charAt(0) === "/" && rawUrl.charAt(1) !== "/") {
+      try { return new URL(rawUrl, "http://demo.invalid/"); } catch (e) { return null; }
+    }
+    try { u = new URL(rawUrl, window.location.href); } catch (e) { return null; }
+    if (u.origin === window.location.origin) return u;
+    return null;
+  }
+  function parseBody(b) {
+    if (b == null || b === "") return null;
+    if (typeof b !== "string") return b;
+    try { return JSON.parse(b); } catch (e) { return b; }
+  }
+  async function dispatch(method, rawUrl, bodyRaw, headers) {
+    var u = internalPath(rawUrl);
+    if (!u || u.pathname.indexOf("/api/") !== 0) return null;      // not ours
+    method = String(method || "GET").toUpperCase();
+    for (var i = 0; i < handlers.length; i++) {
+      var h = handlers[i];
+      if (h.m && h.m !== method) continue;
+      var m = h.re.exec(u.pathname);
+      if (!m) continue;
+      var ctx = { method: method, url: rawUrl, path: u.pathname, query: u.searchParams, params: m.slice(1), match: m,
+                  body: parseBody(bodyRaw), headers: headers || {}, data: data };
+      var out = typeof h.h === "function" ? await h.h(ctx) : h.h;
+      if (out && out.__reply) return out;
+      return reply(out === undefined ? {} : out, 200);
+    }
+    if (prevIsMock) return null;
+    var key = method + " " + u.pathname;
+    if (missing.indexOf(key) < 0) { missing.push(key); console.warn("[mock] unmocked API call: " + key + "  (register it in pages/<slug>.mock.js)"); }
+    return reply({}, 200);
+  }
+  function toResponse(r) {
+    var bodyTxt = r.status === 204 || r.status === 205 ? null : (typeof r.body === "string" ? r.body : JSON.stringify(r.body));
+    var hd = Object.assign({ "Content-Type": "application/json" }, r.headers || {});
+    return new Response(bodyTxt, { status: r.status, headers: hd });
+  }
+
+  window.fetch = function (input, opts) {
+    opts = opts || {};
+    var url = typeof input === "string" ? input : (input && input.url) || String(input);
+    var method = opts.method || (input && input.method) || "GET";
+    return dispatch(method, url, opts.body, opts.headers).then(function (r) {
+      if (r) return toResponse(r);
+      if (prevFetch) return prevFetch(input, opts);
+      return Promise.reject(new TypeError("offline demo: no network"));
+    });
+  };
+
+  // ---- XMLHttpRequest shim (only /api/ calls; the portal itself uses fetch, this is for completeness) ---------------------
+  function MockXHR() {
+    this.readyState = 0; this.status = 0; this.statusText = ""; this.responseText = ""; this.response = null; this.responseType = "";
+    this._l = {}; this._h = {};
+  }
+  MockXHR.prototype.open = function (m, u) { this._m = m; this._u = u; this.readyState = 1; };
+  MockXHR.prototype.setRequestHeader = function (k, v) { this._h[k] = v; };
+  MockXHR.prototype.getResponseHeader = function (k) { return /content-type/i.test(k) ? "application/json" : null; };
+  MockXHR.prototype.getAllResponseHeaders = function () { return "content-type: application/json\r\n"; };
+  MockXHR.prototype.abort = function () { this._abort = true; };
+  MockXHR.prototype.addEventListener = function (t, fn) { (this._l[t] = this._l[t] || []).push(fn); };
+  MockXHR.prototype.removeEventListener = function (t, fn) { this._l[t] = (this._l[t] || []).filter(function (f) { return f !== fn; }); };
+  MockXHR.prototype._fire = function (t) {
+    var ev = { type: t, target: this };
+    if (typeof this["on" + t] === "function") this["on" + t](ev);
+    (this._l[t] || []).forEach(function (fn) { fn.call(this, ev); }, this);
+  };
+  MockXHR.prototype.send = function (body) {
+    var x = this;
+    dispatch(x._m, x._u, body, x._h).then(function (r) {
+      if (x._abort) return;
+      if (!r) { x.readyState = 4; x._fire("readystatechange"); x._fire("error"); x._fire("loadend"); return; }
+      x.status = r.status; x.statusText = r.status === 200 ? "OK" : String(r.status);
+      x.responseText = typeof r.body === "string" ? r.body : JSON.stringify(r.body);
+      x.response = x.responseType === "json" ? r.body : x.responseText;
+      x.readyState = 4;
+      x._fire("readystatechange"); x._fire("load"); x._fire("loadend");
+    });
+  };
+  window.XMLHttpRequest = MockXHR;
+
+  // ---- file:// guards ------------------------------------------------------------------------------------------------------
+  ["replaceState", "pushState"].forEach(function (k) {
+    var orig = history[k].bind(history);
+    history[k] = function () { try { return orig.apply(null, arguments); } catch (e) { /* file:// may refuse a new query string */ } };
+  });
+
+  // ---- portal path -> local file (for links built at runtime, e.g. <a href="/client-intel?login=1">) -----------------------
+  var ROUTES = window.__ROUTES || {};
+  function mapHref(h) {
+    var m = /^([^?#]*)([?#].*)?$/.exec(h), path = m[1], rest = m[2] || "";
+    if (path.length > 1) path = path.replace(/\/+$/, "");
+    var f = ROUTES[path];
+    if (!f) return null;
+    if (f.indexOf("?") >= 0 && rest.charAt(0) === "?") rest = "&" + rest.slice(1);
+    return f + rest;
+  }
+  document.addEventListener("click", function (e) {
+    var a = e.target && e.target.closest ? e.target.closest("a[href]") : null;
+    if (!a) return;
+    var h = a.getAttribute("href");
+    if (!h || h.charAt(0) !== "/" || h.charAt(1) === "/") return;
+    var to = mapHref(h);
+    if (to) a.setAttribute("href", to); else { e.preventDefault(); console.info("[mock] link not available in the demo: " + h); }
+  }, true);
+  document.addEventListener("submit", function (e) {
+    var f = e.target, act = f && f.getAttribute && f.getAttribute("action");
+    if (!act || act.charAt(0) !== "/") return;
+    e.preventDefault();
+    var to = mapHref(act);
+    if (to) window.location.assign(to);
+  }, true);
+
+  // ---- default handlers: the shell (top bar bell, watchlist chip, csrf, labels) that EVERY page calls --------------------
+  var DEMO_WATCHED = [99000001, 99000002, 99000003];
+  register("GET", /^\/api\/session\/csrf$/, { csrf: "dummy-csrf-token" });
+  register("GET", /^\/api\/(whoami|session|me)$/, { actor: "demo.admin", role: "admin", authenticated: true });
+  register("GET", /^\/api\/page-labels$/, { labels: {} });
+  register("PUT", /^\/api\/page-labels$/, function (c) { return { ok: true, label: (c.body && c.body.label) || "" }; });
+  register("GET", /^\/api\/watch\/count$/, { count: DEMO_WATCHED.length, pinned: DEMO_WATCHED.length, logins: DEMO_WATCHED });
+  register("GET", /^\/api\/watchlist\/alerts$/, {
+    items: [{ login: 99000002, alert: true, reasons: ["equity 61% 7d"], pct_of_equity: 61 }, { login: 99000001, alert: false, reasons: [] }],
+  });
+
+  // notifications (bell + /notifications page): kind news_profit only, as notify.py produces.  Times are relative to page load.
+  var NEWS = [["Non-Farm Employment Change", "USD", "NFP"], ["CPI m/m", "USD", "CPI"], ["ECB Main Refinancing Rate", "EUR", "ECB"],
+              ["BOE Official Bank Rate", "GBP", "BOE"], ["Unemployment Rate", "USD", "UR"], ["BOJ Policy Rate", "JPY", "BOJ"]];
+  var SPECS = [  // [minutes ago, severity, login#, +net, title idx, lots, trades, symbols, status]
+    [4, "critical", 12, 5420, 0, 3.2, 4, "XAUUSD +5,210 | EURUSD +210", "pending"], [38, "warn", 7, 1380, 0, 1.5, 3, "XAUUSD +1,380", "pending"],
+    [95, "warn", 3, 1105, 0, 0.8, 2, "XAUUSD +1,105", "pending"], [190, "warn", 21, 1840, 1, 2.0, 5, "EURUSD +1,260 | GBPUSD +580", "sent"],
+    [260, "info", 0, 0, 1, 0, 0, "", "none"], [24 * 60 + 40, "critical", 9, 6210, 2, 4.1, 6, "EURUSD +4,100 | EURGBP +2,110", "sent"],
+    [26 * 60, "warn", 14, 1520, 2, 1.2, 2, "EURUSD +1,520", "sent"], [2 * 24 * 60 + 70, "warn", 5, 1210, 3, 1.0, 3, "GBPUSD +1,210", "sent"],
+    [3 * 24 * 60 + 15, "critical", 18, 5980, 4, 2.6, 4, "XAUUSD +5,000 | USDJPY +980", "sent"], [3 * 24 * 60 + 45, "warn", 2, 1075, 4, 0.6, 2, "XAUUSD +1,075", "sent"],
+    [6 * 24 * 60 + 5, "warn", 30, 1330, 5, 1.1, 2, "USDJPY +1,330", "sent"], [9 * 24 * 60 + 200, "critical", 11, 7050, 0, 5.0, 8, "XAUUSD +6,900 | TECH100 +150", "sent"],
+    [12 * 24 * 60 + 30, "warn", 25, 1160, 1, 0.9, 2, "EURUSD +1,160", "none"], [15 * 24 * 60 + 90, "warn", 8, 1290, 3, 1.4, 3, "GBPUSD +1,290", "none"],
+    [21 * 24 * 60 + 10, "info", 0, 0, 5, 0, 0, "", "none"], [28 * 24 * 60 + 55, "critical", 16, 5600, 2, 3.0, 5, "EURUSD +5,600", "none"],
+  ];
+  var t0 = Date.now(), notifs = null, readPtr = 0;
+  function money(n) { return "$" + Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
+  function buildNotifs() {
+    var rows = SPECS.slice().reverse().map(function (s, i) {      // oldest first -> id 1..n
+      var ev = NEWS[s[4]], id = i + 1, created = new Date(t0 - s[0] * 60000).toISOString().slice(0, 19) + "+00:00";
+      if (s[1] === "info")
+        return { id: id, created_at: created, kind: "news_profit", severity: "info", title: "News profit: no account above the threshold on " + ev[0] + " (" + ev[1] + ")",
+                 body: "0 accounts above $1,000 | window 14:29-14:35 MT", link: "/news", wa_status: "none" };
+      return { id: id, created_at: created, kind: "news_profit", severity: s[1],
+               title: "News profit: #" + (99000000 + s[2]) + " +" + money(s[3]) + " on " + ev[0] + " (" + ev[1] + ")",
+               body: "#" + (99000000 + s[2]) + " Demo Client " + s[2] + " | DUMMY\\Direct\\MVIP | +" + money(s[3]) + ".00 | " + s[7] + " | " + s[5] + " lots / " + s[6] + " trades | 14:30 MT",
+               link: "/news", wa_status: s[8] };
+    });
+    readPtr = rows.length - 5;                                   // the newest 5 are unread
+    return rows;
+  }
+  function nlist() { if (!notifs) notifs = buildNotifs(); return notifs; }
+  function latestId() { return nlist().length; }
+  function unread() { return nlist().filter(function (n) { return n.id > readPtr; }).length; }
+  register("GET", /^\/api\/notifications\/unread$/, function () { return { ok: true, unread: unread(), latest_id: latestId() }; });
+  register("GET", /^\/api\/notifications$/, function (c) {
+    var q = c.query, limit = Math.min(200, Number(q.get("limit") || 20)), since = Number(q.get("since_id") || 0);
+    var days = Number(q.get("days") || 60), sev = q.get("severity"), kind = q.get("kind"), cut = Date.now() - days * 86400000;
+    var items = nlist().filter(function (n) {
+      return n.id > since && (!sev || n.severity === sev) && (!kind || n.kind === kind) && Date.parse(n.created_at) >= cut;
+    }).sort(function (a, b) { return b.id - a.id; }).slice(0, limit);
+    return { ok: true, items: items, latest_id: latestId(), unread: unread(), last_read_id: readPtr };
+  });
+  register("POST", /^\/api\/notifications\/read$/, function (c) {
+    var up = c.body && c.body.upto_id != null ? Math.min(Number(c.body.upto_id), latestId()) : latestId();
+    readPtr = Math.max(readPtr, up);
+    return { ok: true, last_read_id: readPtr, unread: unread() };
+  });
+
+  window.__mock = { register: register, data: data, reply: reply, missing: missing, handlers: handlers, mapHref: mapHref };
+})();
+
+</script>
+</head>
+<body class="login-page" data-state="form" data-next="/"><div id="demo-banner">DUMMY DATA - frontend demo</div>
+  <div id="login-strands" class="login-strands-bg" aria-hidden="true"></div>
+  <header class="login-brand">
+    <span class="brand-mark" aria-hidden="true">GR</span>
+    <span class="login-brand-name">Global Risk Portal</span>
+  </header>
+  <main class="login-shell">
+    <section class="login-panel" aria-labelledby="access-title">
+      <p class="eyebrow">Risk Operations</p>
+      <h1>Global Risk Portal</h1>
+      <p class="login-copy">This device is not approved yet. Request access, or sign in if you have an account.</p>
+      <h2 id="access-title" class="login-form-title">Request access</h2>
+
+      <div id="access-form-state" class="access-state">
+        <div id="access-error" class="notice error hidden" role="alert"></div>
+        <form id="access-form" class="login-form">
+          <label for="access-label">Your name</label>
+          <input id="access-label" name="label" maxlength="80" autocomplete="name" required>
+          <label for="access-purpose">Purpose</label>
+          <textarea id="access-purpose" name="purpose" maxlength="300" rows="3" required></textarea>
+          <button type="submit" class="primary-button">Request access</button>
+        </form>
+      </div>
+
+      <div id="access-pending-state" class="access-state hidden">
+        <p class="login-copy">Waiting for an administrator to approve this device. This page updates by itself -- no need to refresh.</p>
+        <div class="access-spinner" aria-hidden="true"></div>
+      </div>
+
+      <div id="access-denied-state" class="access-state hidden">
+        <div class="notice error" role="alert">Access was denied. You may try again after 24 hours.</div>
+      </div>
+
+      
+      <a class="secondary-button full-width access-login" href="login.html">Sign in with an account</a>
+    </section>
+  </main>
+  
+<script>/* pages/access.py boot */
+(function () {
+  var asked = 0, orig = window.fetch.bind(window);
+  function json(b, s) { return Promise.resolve(new Response(JSON.stringify(b), { status: s || 200, headers: { "Content-Type": "application/json" } })); }
+  window.fetch = function (input, opts) {
+    var url = typeof input === "string" ? input : (input && input.url) || "";
+    var path = url.split("?")[0];
+    if (path === "/access") { asked = Date.now(); return json({ status: "pending" }); }
+    if (path === "/access/status") return json({ status: asked && Date.now() - asked > 12000 ? "denied" : "pending" });
+    return orig(input, opts);
+  };
+  var m = /[?&]state=(form|pending|denied)/.exec(location.search);
+  if (m) {
+    ["form", "pending", "denied"].forEach(function (s) {
+      var n = document.getElementById("access-" + (s === "form" ? "form" : s) + "-state");
+      if (n) n.classList.toggle("hidden", s !== m[1]);
+    });
+    if (m[1] === "pending") asked = Date.now() - 6000;
+  }
+})();
+</script>
+<script>/* login_strands.js */
+(()=>{var A=(e,t,i)=>()=>{if(i)throw i[0];try{return e&&(t=e(e=0)),t}catch(s){throw i=[s],s}};var si=(e,t)=>()=>{try{return t||e((t={exports:{}}).exports,t),t.exports}catch(i){throw t=0,i}};function z(e){let t=e[0],i=e[1],s=e[2];return Math.sqrt(t*t+i*i+s*s)}function k(e,t){return e[0]=t[0],e[1]=t[1],e[2]=t[2],e}function Et(e,t,i,s){return e[0]=t,e[1]=i,e[2]=s,e}function J(e,t,i){return e[0]=t[0]+i[0],e[1]=t[1]+i[1],e[2]=t[2]+i[2],e}function tt(e,t,i){return e[0]=t[0]-i[0],e[1]=t[1]-i[1],e[2]=t[2]-i[2],e}function yt(e,t,i){return e[0]=t[0]*i[0],e[1]=t[1]*i[1],e[2]=t[2]*i[2],e}function Ft(e,t,i){return e[0]=t[0]/i[0],e[1]=t[1]/i[1],e[2]=t[2]/i[2],e}function W(e,t,i){return e[0]=t[0]*i,e[1]=t[1]*i,e[2]=t[2]*i,e}function Mt(e,t){let i=t[0]-e[0],s=t[1]-e[1],r=t[2]-e[2];return Math.sqrt(i*i+s*s+r*r)}function _t(e,t){let i=t[0]-e[0],s=t[1]-e[1],r=t[2]-e[2];return i*i+s*s+r*r}function et(e){let t=e[0],i=e[1],s=e[2];return t*t+i*i+s*s}function Tt(e,t){return e[0]=-t[0],e[1]=-t[1],e[2]=-t[2],e}function At(e,t){return e[0]=1/t[0],e[1]=1/t[1],e[2]=1/t[2],e}function q(e,t){let i=t[0],s=t[1],r=t[2],n=i*i+s*s+r*r;return n>0&&(n=1/Math.sqrt(n)),e[0]=t[0]*n,e[1]=t[1]*n,e[2]=t[2]*n,e}function it(e,t){return e[0]*t[0]+e[1]*t[1]+e[2]*t[2]}function st(e,t,i){let s=t[0],r=t[1],n=t[2],h=i[0],l=i[1],a=i[2];return e[0]=r*a-n*l,e[1]=n*h-s*a,e[2]=s*l-r*h,e}function wt(e,t,i,s){let r=t[0],n=t[1],h=t[2];return e[0]=r+s*(i[0]-r),e[1]=n+s*(i[1]-n),e[2]=h+s*(i[2]-h),e}function Rt(e,t,i,s,r){let n=Math.exp(-s*r),h=t[0],l=t[1],a=t[2];return e[0]=i[0]+(h-i[0])*n,e[1]=i[1]+(l-i[1])*n,e[2]=i[2]+(a-i[2])*n,e}function St(e,t,i){let s=t[0],r=t[1],n=t[2],h=i[3]*s+i[7]*r+i[11]*n+i[15];return h=h||1,e[0]=(i[0]*s+i[4]*r+i[8]*n+i[12])/h,e[1]=(i[1]*s+i[5]*r+i[9]*n+i[13])/h,e[2]=(i[2]*s+i[6]*r+i[10]*n+i[14])/h,e}function bt(e,t,i){let s=t[0],r=t[1],n=t[2],h=i[3]*s+i[7]*r+i[11]*n+i[15];return h=h||1,e[0]=(i[0]*s+i[4]*r+i[8]*n)/h,e[1]=(i[1]*s+i[5]*r+i[9]*n)/h,e[2]=(i[2]*s+i[6]*r+i[10]*n)/h,e}function vt(e,t,i){let s=t[0],r=t[1],n=t[2];return e[0]=s*i[0]+r*i[3]+n*i[6],e[1]=s*i[1]+r*i[4]+n*i[7],e[2]=s*i[2]+r*i[5]+n*i[8],e}function Ct(e,t,i){let s=t[0],r=t[1],n=t[2],h=i[0],l=i[1],a=i[2],f=i[3],c=l*n-a*r,d=a*s-h*n,o=h*r-l*s,g=l*o-a*d,p=a*c-h*o,u=h*d-l*c,x=f*2;return c*=x,d*=x,o*=x,g*=2,p*=2,u*=2,e[0]=s+c+g,e[1]=r+d+p,e[2]=n+o+u,e}function Nt(e,t){return e[0]===t[0]&&e[1]===t[1]&&e[2]===t[2]}var Dt,rt=A(()=>{Dt=(function(){let e=[0,0,0],t=[0,0,0];return function(i,s){k(e,i),k(t,s),q(e,e),q(t,t);let r=it(e,t);return r>1?0:r<-1?Math.PI:Math.acos(r)}})()});var N,H=A(()=>{rt();N=class e extends Array{constructor(t=0,i=t,s=t){return super(t,i,s),this}get x(){return this[0]}get y(){return this[1]}get z(){return this[2]}set x(t){this[0]=t}set y(t){this[1]=t}set z(t){this[2]=t}set(t,i=t,s=t){return t.length?this.copy(t):(Et(this,t,i,s),this)}copy(t){return k(this,t),this}add(t,i){return i?J(this,t,i):J(this,this,t),this}sub(t,i){return i?tt(this,t,i):tt(this,this,t),this}multiply(t){return t.length?yt(this,this,t):W(this,this,t),this}divide(t){return t.length?Ft(this,this,t):W(this,this,1/t),this}inverse(t=this){return At(this,t),this}len(){return z(this)}distance(t){return t?Mt(this,t):z(this)}squaredLen(){return et(this)}squaredDistance(t){return t?_t(this,t):et(this)}negate(t=this){return Tt(this,t),this}cross(t,i){return i?st(this,t,i):st(this,this,t),this}scale(t){return W(this,this,t),this}normalize(){return q(this,this),this}dot(t){return it(this,t)}equals(t){return Nt(this,t)}applyMatrix3(t){return vt(this,this,t),this}applyMatrix4(t){return St(this,this,t),this}scaleRotateMatrix4(t){return bt(this,this,t),this}applyQuaternion(t){return Ct(this,this,t),this}angle(t){return Dt(this,t)}lerp(t,i){return wt(this,this,t,i),this}smoothLerp(t,i,s){return Rt(this,this,t,i,s),this}clone(){return new e(this[0],this[1],this[2])}fromArray(t,i=0){return this[0]=t[i],this[1]=t[i+1],this[2]=t[i+2],this}toArray(t=[],i=0){return t[i]=this[0],t[i+1]=this[1],t[i+2]=this[2],t}transformDirection(t){let i=this[0],s=this[1],r=this[2];return this[0]=t[0]*i+t[4]*s+t[8]*r,this[1]=t[1]*i+t[5]*s+t[9]*r,this[2]=t[2]*i+t[6]*s+t[10]*r,this.normalize()}}});var zt,ri,ni,It,Y,Ot=A(()=>{H();zt=new N,ri=1,ni=1,It=!1,Y=class{constructor(t,i={}){t.canvas||console.error("gl not passed as first argument to Geometry"),this.gl=t,this.attributes=i,this.id=ri++,this.VAOs={},this.drawRange={start:0,count:0},this.instancedCount=0,this.gl.renderer.bindVertexArray(null),this.gl.renderer.currentGeometry=null,this.glState=this.gl.renderer.state;for(let s in i)this.addAttribute(s,i[s])}addAttribute(t,i){if(this.attributes[t]=i,i.id=ni++,i.size=i.size||1,i.type=i.type||(i.data.constructor===Float32Array?this.gl.FLOAT:i.data.constructor===Uint16Array?this.gl.UNSIGNED_SHORT:this.gl.UNSIGNED_INT),i.target=t==="index"?this.gl.ELEMENT_ARRAY_BUFFER:this.gl.ARRAY_BUFFER,i.normalized=i.normalized||!1,i.stride=i.stride||0,i.offset=i.offset||0,i.count=i.count||(i.stride?i.data.byteLength/i.stride:i.data.length/i.size),i.divisor=i.instanced||0,i.needsUpdate=!1,i.usage=i.usage||this.gl.STATIC_DRAW,i.buffer||this.updateAttribute(i),i.divisor){if(this.isInstanced=!0,this.instancedCount&&this.instancedCount!==i.count*i.divisor)return console.warn("geometry has multiple instanced buffers of different length"),this.instancedCount=Math.min(this.instancedCount,i.count*i.divisor);this.instancedCount=i.count*i.divisor}else t==="index"?this.drawRange.count=i.count:this.attributes.index||(this.drawRange.count=Math.max(this.drawRange.count,i.count))}updateAttribute(t){let i=!t.buffer;i&&(t.buffer=this.gl.createBuffer()),this.glState.boundBuffer!==t.buffer&&(this.gl.bindBuffer(t.target,t.buffer),this.glState.boundBuffer=t.buffer),i?this.gl.bufferData(t.target,t.data,t.usage):this.gl.bufferSubData(t.target,0,t.data),t.needsUpdate=!1}setIndex(t){this.addAttribute("index",t)}setDrawRange(t,i){this.drawRange.start=t,this.drawRange.count=i}setInstancedCount(t){this.instancedCount=t}createVAO(t){this.VAOs[t.attributeOrder]=this.gl.renderer.createVertexArray(),this.gl.renderer.bindVertexArray(this.VAOs[t.attributeOrder]),this.bindAttributes(t)}bindAttributes(t){t.attributeLocations.forEach((i,{name:s,type:r})=>{if(!this.attributes[s]){console.warn(`active attribute ${s} not being supplied`);return}let n=this.attributes[s];this.gl.bindBuffer(n.target,n.buffer),this.glState.boundBuffer=n.buffer;let h=1;r===35674&&(h=2),r===35675&&(h=3),r===35676&&(h=4);let l=n.size/h,a=h===1?0:h*h*4,f=h===1?0:h*4;for(let c=0;c<h;c++)this.gl.vertexAttribPointer(i+c,l,n.type,n.normalized,n.stride+a,n.offset+c*f),this.gl.enableVertexAttribArray(i+c),this.gl.renderer.vertexAttribDivisor(i+c,n.divisor)}),this.attributes.index&&this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER,this.attributes.index.buffer)}draw({program:t,mode:i=this.gl.TRIANGLES}){var r;this.gl.renderer.currentGeometry!==`${this.id}_${t.attributeOrder}`&&(this.VAOs[t.attributeOrder]||this.createVAO(t),this.gl.renderer.bindVertexArray(this.VAOs[t.attributeOrder]),this.gl.renderer.currentGeometry=`${this.id}_${t.attributeOrder}`),t.attributeLocations.forEach((n,{name:h})=>{let l=this.attributes[h];l.needsUpdate&&this.updateAttribute(l)});let s=2;((r=this.attributes.index)==null?void 0:r.type)===this.gl.UNSIGNED_INT&&(s=4),this.isInstanced?this.attributes.index?this.gl.renderer.drawElementsInstanced(i,this.drawRange.count,this.attributes.index.type,this.attributes.index.offset+this.drawRange.start*s,this.instancedCount):this.gl.renderer.drawArraysInstanced(i,this.drawRange.start,this.drawRange.count,this.instancedCount):this.attributes.index?this.gl.drawElements(i,this.drawRange.count,this.attributes.index.type,this.attributes.index.offset+this.drawRange.start*s):this.gl.drawArrays(i,this.drawRange.start,this.drawRange.count)}getPosition(){let t=this.attributes.position;if(t.data)return t;if(!It)return console.warn("No position buffer data found to compute bounds"),It=!0}computeBoundingBox(t){t||(t=this.getPosition());let i=t.data,s=t.size;this.bounds||(this.bounds={min:new N,max:new N,center:new N,scale:new N,radius:1/0});let r=this.bounds.min,n=this.bounds.max,h=this.bounds.center,l=this.bounds.scale;r.set(1/0),n.set(-1/0);for(let a=0,f=i.length;a<f;a+=s){let c=i[a],d=i[a+1],o=i[a+2];r.x=Math.min(c,r.x),r.y=Math.min(d,r.y),r.z=Math.min(o,r.z),n.x=Math.max(c,n.x),n.y=Math.max(d,n.y),n.z=Math.max(o,n.z)}l.sub(n,r),h.add(r,n).divide(2)}computeBoundingSphere(t){t||(t=this.getPosition());let i=t.data,s=t.size;this.bounds||this.computeBoundingBox(t);let r=0;for(let n=0,h=i.length;n<h;n+=s)zt.fromArray(i,n),r=Math.max(r,this.bounds.center.squaredDistance(zt));this.bounds.radius=Math.sqrt(r)}remove(){for(let t in this.VAOs)this.gl.renderer.deleteVertexArray(this.VAOs[t]),delete this.VAOs[t];for(let t in this.attributes)this.gl.deleteBuffer(this.attributes[t].buffer),delete this.attributes[t]}}});function nt(e,t,i,s){s=s.length?li(s):s;let r=e.renderer.state.uniformLocations.get(i);if(s.length)if(r===void 0||r.length!==s.length)e.renderer.state.uniformLocations.set(i,s.slice(0));else{if(ai(r,s))return;r.set?r.set(s):fi(r,s),e.renderer.state.uniformLocations.set(i,r)}else{if(r===s)return;e.renderer.state.uniformLocations.set(i,s)}switch(t){case 5126:return s.length?e.uniform1fv(i,s):e.uniform1f(i,s);case 35664:return e.uniform2fv(i,s);case 35665:return e.uniform3fv(i,s);case 35666:return e.uniform4fv(i,s);case 35670:case 5124:case 35678:case 36306:case 35680:case 36289:return s.length?e.uniform1iv(i,s):e.uniform1i(i,s);case 35671:case 35667:return e.uniform2iv(i,s);case 35672:case 35668:return e.uniform3iv(i,s);case 35673:case 35669:return e.uniform4iv(i,s);case 35674:return e.uniformMatrix2fv(i,!1,s);case 35675:return e.uniformMatrix3fv(i,!1,s);case 35676:return e.uniformMatrix4fv(i,!1,s)}}function Bt(e){let t=e.split(`
+`);for(let i=0;i<t.length;i++)t[i]=i+1+": "+t[i];return t.join(`
+`)}function li(e){let t=e.length,i=e[0].length;if(i===void 0)return e;let s=t*i,r=Pt[s];r||(Pt[s]=r=new Float32Array(s));for(let n=0;n<t;n++)r.set(e[n],n*i);return r}function ai(e,t){if(e.length!==t.length)return!1;for(let i=0,s=e.length;i<s;i++)if(e[i]!==t[i])return!1;return!0}function fi(e,t){for(let i=0,s=e.length;i<s;i++)e[i]=t[i]}function Ut(e){ht>100||(console.warn(e),ht++,ht>100&&console.warn("More than 100 program warnings - stopping logs."))}var hi,Pt,I,ht,Vt=A(()=>{hi=1,Pt={},I=class{constructor(t,{vertex:i,fragment:s,uniforms:r={},transparent:n=!1,cullFace:h=t.BACK,frontFace:l=t.CCW,depthTest:a=!0,depthWrite:f=!0,depthFunc:c=t.LEQUAL}={}){t.canvas||console.error("gl not passed as first argument to Program"),this.gl=t,this.uniforms=r,this.id=hi++,i||console.warn("vertex shader not supplied"),s||console.warn("fragment shader not supplied"),this.transparent=n,this.cullFace=h,this.frontFace=l,this.depthTest=a,this.depthWrite=f,this.depthFunc=c,this.blendFunc={},this.blendEquation={},this.stencilFunc={},this.stencilOp={},this.transparent&&!this.blendFunc.src&&(this.gl.renderer.premultipliedAlpha?this.setBlendFunc(this.gl.ONE,this.gl.ONE_MINUS_SRC_ALPHA):this.setBlendFunc(this.gl.SRC_ALPHA,this.gl.ONE_MINUS_SRC_ALPHA)),this.vertexShader=t.createShader(t.VERTEX_SHADER),this.fragmentShader=t.createShader(t.FRAGMENT_SHADER),this.program=t.createProgram(),t.attachShader(this.program,this.vertexShader),t.attachShader(this.program,this.fragmentShader),this.setShaders({vertex:i,fragment:s})}setShaders({vertex:t,fragment:i}){if(t&&(this.gl.shaderSource(this.vertexShader,t),this.gl.compileShader(this.vertexShader),this.gl.getShaderInfoLog(this.vertexShader)!==""&&console.warn(`${this.gl.getShaderInfoLog(this.vertexShader)}
+Vertex Shader
+${Bt(t)}`)),i&&(this.gl.shaderSource(this.fragmentShader,i),this.gl.compileShader(this.fragmentShader),this.gl.getShaderInfoLog(this.fragmentShader)!==""&&console.warn(`${this.gl.getShaderInfoLog(this.fragmentShader)}
+Fragment Shader
+${Bt(i)}`)),this.gl.linkProgram(this.program),!this.gl.getProgramParameter(this.program,this.gl.LINK_STATUS))return console.warn(this.gl.getProgramInfoLog(this.program));this.uniformLocations=new Map;let s=this.gl.getProgramParameter(this.program,this.gl.ACTIVE_UNIFORMS);for(let h=0;h<s;h++){let l=this.gl.getActiveUniform(this.program,h);this.uniformLocations.set(l,this.gl.getUniformLocation(this.program,l.name));let a=l.name.match(/(\w+)/g);l.uniformName=a[0],l.nameComponents=a.slice(1)}this.attributeLocations=new Map;let r=[],n=this.gl.getProgramParameter(this.program,this.gl.ACTIVE_ATTRIBUTES);for(let h=0;h<n;h++){let l=this.gl.getActiveAttrib(this.program,h),a=this.gl.getAttribLocation(this.program,l.name);a!==-1&&(r[a]=l.name,this.attributeLocations.set(l,a))}this.attributeOrder=r.join("")}setBlendFunc(t,i,s,r){this.blendFunc.src=t,this.blendFunc.dst=i,this.blendFunc.srcAlpha=s,this.blendFunc.dstAlpha=r,t&&(this.transparent=!0)}setBlendEquation(t,i){this.blendEquation.modeRGB=t,this.blendEquation.modeAlpha=i}setStencilFunc(t,i,s){this.stencilRef=i,this.stencilFunc.func=t,this.stencilFunc.ref=i,this.stencilFunc.mask=s}setStencilOp(t,i,s){this.stencilOp.stencilFail=t,this.stencilOp.depthFail=i,this.stencilOp.depthPass=s}applyState(){this.depthTest?this.gl.renderer.enable(this.gl.DEPTH_TEST):this.gl.renderer.disable(this.gl.DEPTH_TEST),this.cullFace?this.gl.renderer.enable(this.gl.CULL_FACE):this.gl.renderer.disable(this.gl.CULL_FACE),this.blendFunc.src?this.gl.renderer.enable(this.gl.BLEND):this.gl.renderer.disable(this.gl.BLEND),this.cullFace&&this.gl.renderer.setCullFace(this.cullFace),this.gl.renderer.setFrontFace(this.frontFace),this.gl.renderer.setDepthMask(this.depthWrite),this.gl.renderer.setDepthFunc(this.depthFunc),this.blendFunc.src&&this.gl.renderer.setBlendFunc(this.blendFunc.src,this.blendFunc.dst,this.blendFunc.srcAlpha,this.blendFunc.dstAlpha),this.gl.renderer.setBlendEquation(this.blendEquation.modeRGB,this.blendEquation.modeAlpha),this.stencilFunc.func||this.stencilOp.stencilFail?this.gl.renderer.enable(this.gl.STENCIL_TEST):this.gl.renderer.disable(this.gl.STENCIL_TEST),this.gl.renderer.setStencilFunc(this.stencilFunc.func,this.stencilFunc.ref,this.stencilFunc.mask),this.gl.renderer.setStencilOp(this.stencilOp.stencilFail,this.stencilOp.depthFail,this.stencilOp.depthPass)}use({flipFaces:t=!1}={}){let i=-1;this.gl.renderer.state.currentProgram===this.id||(this.gl.useProgram(this.program),this.gl.renderer.state.currentProgram=this.id),this.uniformLocations.forEach((r,n)=>{let h=this.uniforms[n.uniformName];for(let l of n.nameComponents){if(!h)break;if(l in h)h=h[l];else{if(Array.isArray(h.value))break;h=void 0;break}}if(!h)return Ut(`Active uniform ${n.name} has not been supplied`);if(h&&h.value===void 0)return Ut(`${n.name} uniform is missing a value parameter`);if(h.value.texture)return i=i+1,h.value.update(i),nt(this.gl,n.type,r,i);if(h.value.length&&h.value[0].texture){let l=[];return h.value.forEach(a=>{i=i+1,a.update(i),l.push(i)}),nt(this.gl,n.type,r,l)}nt(this.gl,n.type,r,h.value)}),this.applyState(),t&&this.gl.renderer.setFrontFace(this.frontFace===this.gl.CCW?this.gl.CW:this.gl.CCW)}remove(){this.gl.deleteProgram(this.program)}};ht=0});var lt,ci,B,Gt=A(()=>{H();lt=new N,ci=1,B=class{constructor({canvas:t=document.createElement("canvas"),width:i=300,height:s=150,dpr:r=1,alpha:n=!1,depth:h=!0,stencil:l=!1,antialias:a=!1,premultipliedAlpha:f=!1,preserveDrawingBuffer:c=!1,powerPreference:d="default",autoClear:o=!0,webgl:g=2}={}){let p={alpha:n,depth:h,stencil:l,antialias:a,premultipliedAlpha:f,preserveDrawingBuffer:c,powerPreference:d};this.dpr=r,this.alpha=n,this.color=!0,this.depth=h,this.stencil=l,this.premultipliedAlpha=f,this.autoClear=o,this.id=ci++,g===2&&(this.gl=t.getContext("webgl2",p)),this.isWebgl2=!!this.gl,this.gl||(this.gl=t.getContext("webgl",p)),this.gl||console.error("unable to create webgl context"),this.gl.renderer=this,this.setSize(i,s),this.state={},this.state.blendFunc={src:this.gl.ONE,dst:this.gl.ZERO},this.state.blendEquation={modeRGB:this.gl.FUNC_ADD},this.state.cullFace=!1,this.state.frontFace=this.gl.CCW,this.state.depthMask=!0,this.state.depthFunc=this.gl.LEQUAL,this.state.premultiplyAlpha=!1,this.state.flipY=!1,this.state.unpackAlignment=4,this.state.framebuffer=null,this.state.viewport={x:0,y:0,width:null,height:null},this.state.textureUnits=[],this.state.activeTextureUnit=0,this.state.boundBuffer=null,this.state.uniformLocations=new Map,this.state.currentProgram=null,this.extensions={},this.isWebgl2?(this.getExtension("EXT_color_buffer_float"),this.getExtension("OES_texture_float_linear")):(this.getExtension("OES_texture_float"),this.getExtension("OES_texture_float_linear"),this.getExtension("OES_texture_half_float"),this.getExtension("OES_texture_half_float_linear"),this.getExtension("OES_element_index_uint"),this.getExtension("OES_standard_derivatives"),this.getExtension("EXT_sRGB"),this.getExtension("WEBGL_depth_texture"),this.getExtension("WEBGL_draw_buffers")),this.getExtension("WEBGL_compressed_texture_astc"),this.getExtension("EXT_texture_compression_bptc"),this.getExtension("WEBGL_compressed_texture_s3tc"),this.getExtension("WEBGL_compressed_texture_etc1"),this.getExtension("WEBGL_compressed_texture_pvrtc"),this.getExtension("WEBKIT_WEBGL_compressed_texture_pvrtc"),this.vertexAttribDivisor=this.getExtension("ANGLE_instanced_arrays","vertexAttribDivisor","vertexAttribDivisorANGLE"),this.drawArraysInstanced=this.getExtension("ANGLE_instanced_arrays","drawArraysInstanced","drawArraysInstancedANGLE"),this.drawElementsInstanced=this.getExtension("ANGLE_instanced_arrays","drawElementsInstanced","drawElementsInstancedANGLE"),this.createVertexArray=this.getExtension("OES_vertex_array_object","createVertexArray","createVertexArrayOES"),this.bindVertexArray=this.getExtension("OES_vertex_array_object","bindVertexArray","bindVertexArrayOES"),this.deleteVertexArray=this.getExtension("OES_vertex_array_object","deleteVertexArray","deleteVertexArrayOES"),this.drawBuffers=this.getExtension("WEBGL_draw_buffers","drawBuffers","drawBuffersWEBGL"),this.parameters={},this.parameters.maxTextureUnits=this.gl.getParameter(this.gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS),this.parameters.maxAnisotropy=this.getExtension("EXT_texture_filter_anisotropic")?this.gl.getParameter(this.getExtension("EXT_texture_filter_anisotropic").MAX_TEXTURE_MAX_ANISOTROPY_EXT):0}setSize(t,i){this.width=t,this.height=i,this.gl.canvas.width=t*this.dpr,this.gl.canvas.height=i*this.dpr,this.gl.canvas.style&&Object.assign(this.gl.canvas.style,{width:t+"px",height:i+"px"})}setViewport(t,i,s=0,r=0){this.state.viewport.width===t&&this.state.viewport.height===i||(this.state.viewport.width=t,this.state.viewport.height=i,this.state.viewport.x=s,this.state.viewport.y=r,this.gl.viewport(s,r,t,i))}setScissor(t,i,s=0,r=0){this.gl.scissor(s,r,t,i)}enable(t){this.state[t]!==!0&&(this.gl.enable(t),this.state[t]=!0)}disable(t){this.state[t]!==!1&&(this.gl.disable(t),this.state[t]=!1)}setBlendFunc(t,i,s,r){this.state.blendFunc.src===t&&this.state.blendFunc.dst===i&&this.state.blendFunc.srcAlpha===s&&this.state.blendFunc.dstAlpha===r||(this.state.blendFunc.src=t,this.state.blendFunc.dst=i,this.state.blendFunc.srcAlpha=s,this.state.blendFunc.dstAlpha=r,s!==void 0?this.gl.blendFuncSeparate(t,i,s,r):this.gl.blendFunc(t,i))}setBlendEquation(t,i){t=t||this.gl.FUNC_ADD,!(this.state.blendEquation.modeRGB===t&&this.state.blendEquation.modeAlpha===i)&&(this.state.blendEquation.modeRGB=t,this.state.blendEquation.modeAlpha=i,i!==void 0?this.gl.blendEquationSeparate(t,i):this.gl.blendEquation(t))}setCullFace(t){this.state.cullFace!==t&&(this.state.cullFace=t,this.gl.cullFace(t))}setFrontFace(t){this.state.frontFace!==t&&(this.state.frontFace=t,this.gl.frontFace(t))}setDepthMask(t){this.state.depthMask!==t&&(this.state.depthMask=t,this.gl.depthMask(t))}setDepthFunc(t){this.state.depthFunc!==t&&(this.state.depthFunc=t,this.gl.depthFunc(t))}setStencilMask(t){this.state.stencilMask!==t&&(this.state.stencilMask=t,this.gl.stencilMask(t))}setStencilFunc(t,i,s){this.state.stencilFunc===t&&this.state.stencilRef===i&&this.state.stencilFuncMask===s||(this.state.stencilFunc=t||this.gl.ALWAYS,this.state.stencilRef=i||0,this.state.stencilFuncMask=s||0,this.gl.stencilFunc(t||this.gl.ALWAYS,i||0,s||0))}setStencilOp(t,i,s){this.state.stencilFail===t&&this.state.stencilDepthFail===i&&this.state.stencilDepthPass===s||(this.state.stencilFail=t,this.state.stencilDepthFail=i,this.state.stencilDepthPass=s,this.gl.stencilOp(t,i,s))}activeTexture(t){this.state.activeTextureUnit!==t&&(this.state.activeTextureUnit=t,this.gl.activeTexture(this.gl.TEXTURE0+t))}bindFramebuffer({target:t=this.gl.FRAMEBUFFER,buffer:i=null}={}){this.state.framebuffer!==i&&(this.state.framebuffer=i,this.gl.bindFramebuffer(t,i))}getExtension(t,i,s){return i&&this.gl[i]?this.gl[i].bind(this.gl):(this.extensions[t]||(this.extensions[t]=this.gl.getExtension(t)),i?this.extensions[t]?this.extensions[t][s].bind(this.extensions[t]):null:this.extensions[t])}sortOpaque(t,i){return t.renderOrder!==i.renderOrder?t.renderOrder-i.renderOrder:t.program.id!==i.program.id?t.program.id-i.program.id:t.zDepth!==i.zDepth?t.zDepth-i.zDepth:i.id-t.id}sortTransparent(t,i){return t.renderOrder!==i.renderOrder?t.renderOrder-i.renderOrder:t.zDepth!==i.zDepth?i.zDepth-t.zDepth:i.id-t.id}sortUI(t,i){return t.renderOrder!==i.renderOrder?t.renderOrder-i.renderOrder:t.program.id!==i.program.id?t.program.id-i.program.id:i.id-t.id}getRenderList({scene:t,camera:i,frustumCull:s,sort:r}){let n=[];if(i&&s&&i.updateFrustum(),t.traverse(h=>{if(!h.visible)return!0;h.draw&&(s&&h.frustumCulled&&i&&!i.frustumIntersectsMesh(h)||n.push(h))}),r){let h=[],l=[],a=[];n.forEach(f=>{f.program.transparent?f.program.depthTest?l.push(f):a.push(f):h.push(f),f.zDepth=0,!(f.renderOrder!==0||!f.program.depthTest||!i)&&(f.worldMatrix.getTranslation(lt),lt.applyMatrix4(i.projectionViewMatrix),f.zDepth=lt.z)}),h.sort(this.sortOpaque),l.sort(this.sortTransparent),a.sort(this.sortUI),n=h.concat(l,a)}return n}render({scene:t,camera:i,target:s=null,update:r=!0,sort:n=!0,frustumCull:h=!0,clear:l}){s===null?(this.bindFramebuffer(),this.setViewport(this.width*this.dpr,this.height*this.dpr)):(this.bindFramebuffer(s),this.setViewport(s.width,s.height)),(l||this.autoClear&&l!==!1)&&(this.depth&&(!s||s.depth)&&(this.enable(this.gl.DEPTH_TEST),this.setDepthMask(!0)),(this.stencil||!s||s.stencil)&&(this.enable(this.gl.STENCIL_TEST),this.setStencilMask(255)),this.gl.clear((this.color?this.gl.COLOR_BUFFER_BIT:0)|(this.depth?this.gl.DEPTH_BUFFER_BIT:0)|(this.stencil?this.gl.STENCIL_BUFFER_BIT:0))),r&&t.updateMatrixWorld(),i&&i.updateMatrixWorld(),this.getRenderList({scene:t,camera:i,frustumCull:h,sort:n}).forEach(f=>{f.draw({camera:i})})}}});function Xt(e,t){return e[0]=t[0],e[1]=t[1],e[2]=t[2],e[3]=t[3],e}function kt(e,t,i,s,r){return e[0]=t,e[1]=i,e[2]=s,e[3]=r,e}function qt(e,t){let i=t[0],s=t[1],r=t[2],n=t[3],h=i*i+s*s+r*r+n*n;return h>0&&(h=1/Math.sqrt(h)),e[0]=i*h,e[1]=s*h,e[2]=r*h,e[3]=n*h,e}function Wt(e,t){return e[0]*t[0]+e[1]*t[1]+e[2]*t[2]+e[3]*t[3]}var Ht=A(()=>{});function Yt(e){return e[0]=0,e[1]=0,e[2]=0,e[3]=1,e}function Qt(e,t,i){i=i*.5;let s=Math.sin(i);return e[0]=s*t[0],e[1]=s*t[1],e[2]=s*t[2],e[3]=Math.cos(i),e}function at(e,t,i){let s=t[0],r=t[1],n=t[2],h=t[3],l=i[0],a=i[1],f=i[2],c=i[3];return e[0]=s*c+h*l+r*f-n*a,e[1]=r*c+h*a+n*l-s*f,e[2]=n*c+h*f+s*a-r*l,e[3]=h*c-s*l-r*a-n*f,e}function Zt(e,t,i){i*=.5;let s=t[0],r=t[1],n=t[2],h=t[3],l=Math.sin(i),a=Math.cos(i);return e[0]=s*a+h*l,e[1]=r*a+n*l,e[2]=n*a-r*l,e[3]=h*a-s*l,e}function jt(e,t,i){i*=.5;let s=t[0],r=t[1],n=t[2],h=t[3],l=Math.sin(i),a=Math.cos(i);return e[0]=s*a-n*l,e[1]=r*a+h*l,e[2]=n*a+s*l,e[3]=h*a-r*l,e}function $t(e,t,i){i*=.5;let s=t[0],r=t[1],n=t[2],h=t[3],l=Math.sin(i),a=Math.cos(i);return e[0]=s*a+r*l,e[1]=r*a-s*l,e[2]=n*a+h*l,e[3]=h*a-n*l,e}function Kt(e,t,i,s){let r=t[0],n=t[1],h=t[2],l=t[3],a=i[0],f=i[1],c=i[2],d=i[3],o,g,p,u,x;return g=r*a+n*f+h*c+l*d,g<0&&(g=-g,a=-a,f=-f,c=-c,d=-d),1-g>1e-6?(o=Math.acos(g),p=Math.sin(o),u=Math.sin((1-s)*o)/p,x=Math.sin(s*o)/p):(u=1-s,x=s),e[0]=u*r+x*a,e[1]=u*n+x*f,e[2]=u*h+x*c,e[3]=u*l+x*d,e}function Jt(e,t){let i=t[0],s=t[1],r=t[2],n=t[3],h=i*i+s*s+r*r+n*n,l=h?1/h:0;return e[0]=-i*l,e[1]=-s*l,e[2]=-r*l,e[3]=n*l,e}function te(e,t){return e[0]=-t[0],e[1]=-t[1],e[2]=-t[2],e[3]=t[3],e}function ee(e,t){let i=t[0]+t[4]+t[8],s;if(i>0)s=Math.sqrt(i+1),e[3]=.5*s,s=.5/s,e[0]=(t[5]-t[7])*s,e[1]=(t[6]-t[2])*s,e[2]=(t[1]-t[3])*s;else{let r=0;t[4]>t[0]&&(r=1),t[8]>t[r*3+r]&&(r=2);let n=(r+1)%3,h=(r+2)%3;s=Math.sqrt(t[r*3+r]-t[n*3+n]-t[h*3+h]+1),e[r]=.5*s,s=.5/s,e[3]=(t[n*3+h]-t[h*3+n])*s,e[n]=(t[n*3+r]+t[r*3+n])*s,e[h]=(t[h*3+r]+t[r*3+h])*s}return e}function ie(e,t,i="YXZ"){let s=Math.sin(t[0]*.5),r=Math.cos(t[0]*.5),n=Math.sin(t[1]*.5),h=Math.cos(t[1]*.5),l=Math.sin(t[2]*.5),a=Math.cos(t[2]*.5);return i==="XYZ"?(e[0]=s*h*a+r*n*l,e[1]=r*n*a-s*h*l,e[2]=r*h*l+s*n*a,e[3]=r*h*a-s*n*l):i==="YXZ"?(e[0]=s*h*a+r*n*l,e[1]=r*n*a-s*h*l,e[2]=r*h*l-s*n*a,e[3]=r*h*a+s*n*l):i==="ZXY"?(e[0]=s*h*a-r*n*l,e[1]=r*n*a+s*h*l,e[2]=r*h*l+s*n*a,e[3]=r*h*a-s*n*l):i==="ZYX"?(e[0]=s*h*a-r*n*l,e[1]=r*n*a+s*h*l,e[2]=r*h*l-s*n*a,e[3]=r*h*a+s*n*l):i==="YZX"?(e[0]=s*h*a+r*n*l,e[1]=r*n*a+s*h*l,e[2]=r*h*l-s*n*a,e[3]=r*h*a-s*n*l):i==="XZY"&&(e[0]=s*h*a-r*n*l,e[1]=r*n*a-s*h*l,e[2]=r*h*l+s*n*a,e[3]=r*h*a+s*n*l),e}var se,re,ne,he,le=A(()=>{Ht();se=Xt,re=kt,ne=Wt,he=qt});var Q,ae=A(()=>{le();Q=class extends Array{constructor(t=0,i=0,s=0,r=1){super(t,i,s,r),this.onChange=()=>{},this._target=this;let n=["0","1","2","3"];return new Proxy(this,{set(h,l){let a=Reflect.set(...arguments);return a&&n.includes(l)&&h.onChange(),a}})}get x(){return this[0]}get y(){return this[1]}get z(){return this[2]}get w(){return this[3]}set x(t){this._target[0]=t,this.onChange()}set y(t){this._target[1]=t,this.onChange()}set z(t){this._target[2]=t,this.onChange()}set w(t){this._target[3]=t,this.onChange()}identity(){return Yt(this._target),this.onChange(),this}set(t,i,s,r){return t.length?this.copy(t):(re(this._target,t,i,s,r),this.onChange(),this)}rotateX(t){return Zt(this._target,this._target,t),this.onChange(),this}rotateY(t){return jt(this._target,this._target,t),this.onChange(),this}rotateZ(t){return $t(this._target,this._target,t),this.onChange(),this}inverse(t=this._target){return Jt(this._target,t),this.onChange(),this}conjugate(t=this._target){return te(this._target,t),this.onChange(),this}copy(t){return se(this._target,t),this.onChange(),this}normalize(t=this._target){return he(this._target,t),this.onChange(),this}multiply(t,i){return i?at(this._target,t,i):at(this._target,this._target,t),this.onChange(),this}dot(t){return ne(this._target,t)}fromMatrix3(t){return ee(this._target,t),this.onChange(),this}fromEuler(t,i){return ie(this._target,t,t.order),i||this.onChange(),this}fromAxisAngle(t,i){return Qt(this._target,t,i),this.onChange(),this}slerp(t,i){return Kt(this._target,this._target,t,i),this.onChange(),this}fromArray(t,i=0){return this._target[0]=t[i],this._target[1]=t[i+1],this._target[2]=t[i+2],this._target[3]=t[i+3],this.onChange(),this}toArray(t=[],i=0){return t[i]=this[0],t[i+1]=this[1],t[i+2]=this[2],t[i+3]=this[3],t}}});function fe(e,t){return e[0]=t[0],e[1]=t[1],e[2]=t[2],e[3]=t[3],e[4]=t[4],e[5]=t[5],e[6]=t[6],e[7]=t[7],e[8]=t[8],e[9]=t[9],e[10]=t[10],e[11]=t[11],e[12]=t[12],e[13]=t[13],e[14]=t[14],e[15]=t[15],e}function ce(e,t,i,s,r,n,h,l,a,f,c,d,o,g,p,u,x){return e[0]=t,e[1]=i,e[2]=s,e[3]=r,e[4]=n,e[5]=h,e[6]=l,e[7]=a,e[8]=f,e[9]=c,e[10]=d,e[11]=o,e[12]=g,e[13]=p,e[14]=u,e[15]=x,e}function oe(e){return e[0]=1,e[1]=0,e[2]=0,e[3]=0,e[4]=0,e[5]=1,e[6]=0,e[7]=0,e[8]=0,e[9]=0,e[10]=1,e[11]=0,e[12]=0,e[13]=0,e[14]=0,e[15]=1,e}function de(e,t){let i=t[0],s=t[1],r=t[2],n=t[3],h=t[4],l=t[5],a=t[6],f=t[7],c=t[8],d=t[9],o=t[10],g=t[11],p=t[12],u=t[13],x=t[14],m=t[15],T=i*l-s*h,y=i*a-r*h,E=i*f-n*h,M=s*a-r*l,F=s*f-n*l,w=r*f-n*a,b=c*u-d*p,v=c*x-o*p,R=c*m-g*p,C=d*x-o*u,S=d*m-g*u,D=o*m-g*x,_=T*D-y*S+E*C+M*R-F*v+w*b;return _?(_=1/_,e[0]=(l*D-a*S+f*C)*_,e[1]=(r*S-s*D-n*C)*_,e[2]=(u*w-x*F+m*M)*_,e[3]=(o*F-d*w-g*M)*_,e[4]=(a*R-h*D-f*v)*_,e[5]=(i*D-r*R+n*v)*_,e[6]=(x*E-p*w-m*y)*_,e[7]=(c*w-o*E+g*y)*_,e[8]=(h*S-l*R+f*b)*_,e[9]=(s*R-i*S-n*b)*_,e[10]=(p*F-u*E+m*T)*_,e[11]=(d*E-c*F-g*T)*_,e[12]=(l*v-h*C-a*b)*_,e[13]=(i*C-s*v+r*b)*_,e[14]=(u*y-p*M-x*T)*_,e[15]=(c*M-d*y+o*T)*_,e):null}function ft(e){let t=e[0],i=e[1],s=e[2],r=e[3],n=e[4],h=e[5],l=e[6],a=e[7],f=e[8],c=e[9],d=e[10],o=e[11],g=e[12],p=e[13],u=e[14],x=e[15],m=t*h-i*n,T=t*l-s*n,y=t*a-r*n,E=i*l-s*h,M=i*a-r*h,F=s*a-r*l,w=f*p-c*g,b=f*u-d*g,v=f*x-o*g,R=c*u-d*p,C=c*x-o*p,S=d*x-o*u;return m*S-T*C+y*R+E*v-M*b+F*w}function ct(e,t,i){let s=t[0],r=t[1],n=t[2],h=t[3],l=t[4],a=t[5],f=t[6],c=t[7],d=t[8],o=t[9],g=t[10],p=t[11],u=t[12],x=t[13],m=t[14],T=t[15],y=i[0],E=i[1],M=i[2],F=i[3];return e[0]=y*s+E*l+M*d+F*u,e[1]=y*r+E*a+M*o+F*x,e[2]=y*n+E*f+M*g+F*m,e[3]=y*h+E*c+M*p+F*T,y=i[4],E=i[5],M=i[6],F=i[7],e[4]=y*s+E*l+M*d+F*u,e[5]=y*r+E*a+M*o+F*x,e[6]=y*n+E*f+M*g+F*m,e[7]=y*h+E*c+M*p+F*T,y=i[8],E=i[9],M=i[10],F=i[11],e[8]=y*s+E*l+M*d+F*u,e[9]=y*r+E*a+M*o+F*x,e[10]=y*n+E*f+M*g+F*m,e[11]=y*h+E*c+M*p+F*T,y=i[12],E=i[13],M=i[14],F=i[15],e[12]=y*s+E*l+M*d+F*u,e[13]=y*r+E*a+M*o+F*x,e[14]=y*n+E*f+M*g+F*m,e[15]=y*h+E*c+M*p+F*T,e}function ge(e,t,i){let s=i[0],r=i[1],n=i[2],h,l,a,f,c,d,o,g,p,u,x,m;return t===e?(e[12]=t[0]*s+t[4]*r+t[8]*n+t[12],e[13]=t[1]*s+t[5]*r+t[9]*n+t[13],e[14]=t[2]*s+t[6]*r+t[10]*n+t[14],e[15]=t[3]*s+t[7]*r+t[11]*n+t[15]):(h=t[0],l=t[1],a=t[2],f=t[3],c=t[4],d=t[5],o=t[6],g=t[7],p=t[8],u=t[9],x=t[10],m=t[11],e[0]=h,e[1]=l,e[2]=a,e[3]=f,e[4]=c,e[5]=d,e[6]=o,e[7]=g,e[8]=p,e[9]=u,e[10]=x,e[11]=m,e[12]=h*s+c*r+p*n+t[12],e[13]=l*s+d*r+u*n+t[13],e[14]=a*s+o*r+x*n+t[14],e[15]=f*s+g*r+m*n+t[15]),e}function pe(e,t,i){let s=i[0],r=i[1],n=i[2];return e[0]=t[0]*s,e[1]=t[1]*s,e[2]=t[2]*s,e[3]=t[3]*s,e[4]=t[4]*r,e[5]=t[5]*r,e[6]=t[6]*r,e[7]=t[7]*r,e[8]=t[8]*n,e[9]=t[9]*n,e[10]=t[10]*n,e[11]=t[11]*n,e[12]=t[12],e[13]=t[13],e[14]=t[14],e[15]=t[15],e}function ue(e,t,i,s){let r=s[0],n=s[1],h=s[2],l=Math.hypot(r,n,h),a,f,c,d,o,g,p,u,x,m,T,y,E,M,F,w,b,v,R,C,S,D,_,P;return Math.abs(l)<gi?null:(l=1/l,r*=l,n*=l,h*=l,a=Math.sin(i),f=Math.cos(i),c=1-f,d=t[0],o=t[1],g=t[2],p=t[3],u=t[4],x=t[5],m=t[6],T=t[7],y=t[8],E=t[9],M=t[10],F=t[11],w=r*r*c+f,b=n*r*c+h*a,v=h*r*c-n*a,R=r*n*c-h*a,C=n*n*c+f,S=h*n*c+r*a,D=r*h*c+n*a,_=n*h*c-r*a,P=h*h*c+f,e[0]=d*w+u*b+y*v,e[1]=o*w+x*b+E*v,e[2]=g*w+m*b+M*v,e[3]=p*w+T*b+F*v,e[4]=d*R+u*C+y*S,e[5]=o*R+x*C+E*S,e[6]=g*R+m*C+M*S,e[7]=p*R+T*C+F*S,e[8]=d*D+u*_+y*P,e[9]=o*D+x*_+E*P,e[10]=g*D+m*_+M*P,e[11]=p*D+T*_+F*P,t!==e&&(e[12]=t[12],e[13]=t[13],e[14]=t[14],e[15]=t[15]),e)}function xe(e,t){return e[0]=t[12],e[1]=t[13],e[2]=t[14],e}function ot(e,t){let i=t[0],s=t[1],r=t[2],n=t[4],h=t[5],l=t[6],a=t[8],f=t[9],c=t[10];return e[0]=Math.hypot(i,s,r),e[1]=Math.hypot(n,h,l),e[2]=Math.hypot(a,f,c),e}function me(e){let t=e[0],i=e[1],s=e[2],r=e[4],n=e[5],h=e[6],l=e[8],a=e[9],f=e[10],c=t*t+i*i+s*s,d=r*r+n*n+h*h,o=l*l+a*a+f*f;return Math.sqrt(Math.max(c,d,o))}function Ee(e,t,i,s){let r=z([e[0],e[1],e[2]]),n=z([e[4],e[5],e[6]]),h=z([e[8],e[9],e[10]]);ft(e)<0&&(r=-r),i[0]=e[12],i[1]=e[13],i[2]=e[14];let a=e.slice(),f=1/r,c=1/n,d=1/h;a[0]*=f,a[1]*=f,a[2]*=f,a[4]*=c,a[5]*=c,a[6]*=c,a[8]*=d,a[9]*=d,a[10]*=d,dt(t,a),s[0]=r,s[1]=n,s[2]=h}function ye(e,t,i,s){let r=e,n=t[0],h=t[1],l=t[2],a=t[3],f=n+n,c=h+h,d=l+l,o=n*f,g=n*c,p=n*d,u=h*c,x=h*d,m=l*d,T=a*f,y=a*c,E=a*d,M=s[0],F=s[1],w=s[2];return r[0]=(1-(u+m))*M,r[1]=(g+E)*M,r[2]=(p-y)*M,r[3]=0,r[4]=(g-E)*F,r[5]=(1-(o+m))*F,r[6]=(x+T)*F,r[7]=0,r[8]=(p+y)*w,r[9]=(x-T)*w,r[10]=(1-(o+u))*w,r[11]=0,r[12]=i[0],r[13]=i[1],r[14]=i[2],r[15]=1,r}function Fe(e,t){let i=t[0],s=t[1],r=t[2],n=t[3],h=i+i,l=s+s,a=r+r,f=i*h,c=s*h,d=s*l,o=r*h,g=r*l,p=r*a,u=n*h,x=n*l,m=n*a;return e[0]=1-d-p,e[1]=c+m,e[2]=o-x,e[3]=0,e[4]=c-m,e[5]=1-f-p,e[6]=g+u,e[7]=0,e[8]=o+x,e[9]=g-u,e[10]=1-f-d,e[11]=0,e[12]=0,e[13]=0,e[14]=0,e[15]=1,e}function Me(e,t,i,s,r){let n=1/Math.tan(t/2),h=1/(s-r);return e[0]=n/i,e[1]=0,e[2]=0,e[3]=0,e[4]=0,e[5]=n,e[6]=0,e[7]=0,e[8]=0,e[9]=0,e[10]=(r+s)*h,e[11]=-1,e[12]=0,e[13]=0,e[14]=2*r*s*h,e[15]=0,e}function _e(e,t,i,s,r,n,h){let l=1/(t-i),a=1/(s-r),f=1/(n-h);return e[0]=-2*l,e[1]=0,e[2]=0,e[3]=0,e[4]=0,e[5]=-2*a,e[6]=0,e[7]=0,e[8]=0,e[9]=0,e[10]=2*f,e[11]=0,e[12]=(t+i)*l,e[13]=(r+s)*a,e[14]=(h+n)*f,e[15]=1,e}function Te(e,t,i,s){let r=t[0],n=t[1],h=t[2],l=s[0],a=s[1],f=s[2],c=r-i[0],d=n-i[1],o=h-i[2],g=c*c+d*d+o*o;g===0?o=1:(g=1/Math.sqrt(g),c*=g,d*=g,o*=g);let p=a*o-f*d,u=f*c-l*o,x=l*d-a*c;return g=p*p+u*u+x*x,g===0&&(f?l+=1e-6:a?f+=1e-6:a+=1e-6,p=a*o-f*d,u=f*c-l*o,x=l*d-a*c,g=p*p+u*u+x*x),g=1/Math.sqrt(g),p*=g,u*=g,x*=g,e[0]=p,e[1]=u,e[2]=x,e[3]=0,e[4]=d*x-o*u,e[5]=o*p-c*x,e[6]=c*u-d*p,e[7]=0,e[8]=c,e[9]=d,e[10]=o,e[11]=0,e[12]=r,e[13]=n,e[14]=h,e[15]=1,e}function gt(e,t,i){return e[0]=t[0]+i[0],e[1]=t[1]+i[1],e[2]=t[2]+i[2],e[3]=t[3]+i[3],e[4]=t[4]+i[4],e[5]=t[5]+i[5],e[6]=t[6]+i[6],e[7]=t[7]+i[7],e[8]=t[8]+i[8],e[9]=t[9]+i[9],e[10]=t[10]+i[10],e[11]=t[11]+i[11],e[12]=t[12]+i[12],e[13]=t[13]+i[13],e[14]=t[14]+i[14],e[15]=t[15]+i[15],e}function pt(e,t,i){return e[0]=t[0]-i[0],e[1]=t[1]-i[1],e[2]=t[2]-i[2],e[3]=t[3]-i[3],e[4]=t[4]-i[4],e[5]=t[5]-i[5],e[6]=t[6]-i[6],e[7]=t[7]-i[7],e[8]=t[8]-i[8],e[9]=t[9]-i[9],e[10]=t[10]-i[10],e[11]=t[11]-i[11],e[12]=t[12]-i[12],e[13]=t[13]-i[13],e[14]=t[14]-i[14],e[15]=t[15]-i[15],e}function Ae(e,t,i){return e[0]=t[0]*i,e[1]=t[1]*i,e[2]=t[2]*i,e[3]=t[3]*i,e[4]=t[4]*i,e[5]=t[5]*i,e[6]=t[6]*i,e[7]=t[7]*i,e[8]=t[8]*i,e[9]=t[9]*i,e[10]=t[10]*i,e[11]=t[11]*i,e[12]=t[12]*i,e[13]=t[13]*i,e[14]=t[14]*i,e[15]=t[15]*i,e}var gi,dt,we=A(()=>{rt();gi=1e-6;dt=(function(){let e=[1,1,1];return function(t,i){let s=e;ot(s,i);let r=1/s[0],n=1/s[1],h=1/s[2],l=i[0]*r,a=i[1]*n,f=i[2]*h,c=i[4]*r,d=i[5]*n,o=i[6]*h,g=i[8]*r,p=i[9]*n,u=i[10]*h,x=l+d+u,m=0;return x>0?(m=Math.sqrt(x+1)*2,t[3]=.25*m,t[0]=(o-p)/m,t[1]=(g-f)/m,t[2]=(a-c)/m):l>d&&l>u?(m=Math.sqrt(1+l-d-u)*2,t[3]=(o-p)/m,t[0]=.25*m,t[1]=(a+c)/m,t[2]=(g+f)/m):d>u?(m=Math.sqrt(1+d-l-u)*2,t[3]=(g-f)/m,t[0]=(a+c)/m,t[1]=.25*m,t[2]=(o+p)/m):(m=Math.sqrt(1+u-l-d)*2,t[3]=(a-c)/m,t[0]=(g+f)/m,t[1]=(o+p)/m,t[2]=.25*m),t}})()});var L,Z=A(()=>{we();L=class extends Array{constructor(t=1,i=0,s=0,r=0,n=0,h=1,l=0,a=0,f=0,c=0,d=1,o=0,g=0,p=0,u=0,x=1){return super(t,i,s,r,n,h,l,a,f,c,d,o,g,p,u,x),this}get x(){return this[12]}get y(){return this[13]}get z(){return this[14]}get w(){return this[15]}set x(t){this[12]=t}set y(t){this[13]=t}set z(t){this[14]=t}set w(t){this[15]=t}set(t,i,s,r,n,h,l,a,f,c,d,o,g,p,u,x){return t.length?this.copy(t):(ce(this,t,i,s,r,n,h,l,a,f,c,d,o,g,p,u,x),this)}translate(t,i=this){return ge(this,i,t),this}rotate(t,i,s=this){return ue(this,s,t,i),this}scale(t,i=this){return pe(this,i,typeof t=="number"?[t,t,t]:t),this}add(t,i){return i?gt(this,t,i):gt(this,this,t),this}sub(t,i){return i?pt(this,t,i):pt(this,this,t),this}multiply(t,i){return t.length?i?ct(this,t,i):ct(this,this,t):Ae(this,this,t),this}identity(){return oe(this),this}copy(t){return fe(this,t),this}fromPerspective({fov:t,aspect:i,near:s,far:r}={}){return Me(this,t,i,s,r),this}fromOrthogonal({left:t,right:i,bottom:s,top:r,near:n,far:h}){return _e(this,t,i,s,r,n,h),this}fromQuaternion(t){return Fe(this,t),this}setPosition(t){return this.x=t[0],this.y=t[1],this.z=t[2],this}inverse(t=this){return de(this,t),this}compose(t,i,s){return ye(this,t,i,s),this}decompose(t,i,s){return Ee(this,t,i,s),this}getRotation(t){return dt(t,this),this}getTranslation(t){return xe(t,this),this}getScaling(t){return ot(t,this),this}getMaxScaleOnAxis(){return me(this)}lookAt(t,i,s){return Te(this,t,i,s),this}determinant(){return ft(this)}fromArray(t,i=0){return this[0]=t[i],this[1]=t[i+1],this[2]=t[i+2],this[3]=t[i+3],this[4]=t[i+4],this[5]=t[i+5],this[6]=t[i+6],this[7]=t[i+7],this[8]=t[i+8],this[9]=t[i+9],this[10]=t[i+10],this[11]=t[i+11],this[12]=t[i+12],this[13]=t[i+13],this[14]=t[i+14],this[15]=t[i+15],this}toArray(t=[],i=0){return t[i]=this[0],t[i+1]=this[1],t[i+2]=this[2],t[i+3]=this[3],t[i+4]=this[4],t[i+5]=this[5],t[i+6]=this[6],t[i+7]=this[7],t[i+8]=this[8],t[i+9]=this[9],t[i+10]=this[10],t[i+11]=this[11],t[i+12]=this[12],t[i+13]=this[13],t[i+14]=this[14],t[i+15]=this[15],t}}});function Re(e,t,i="YXZ"){return i==="XYZ"?(e[1]=Math.asin(Math.min(Math.max(t[8],-1),1)),Math.abs(t[8])<.99999?(e[0]=Math.atan2(-t[9],t[10]),e[2]=Math.atan2(-t[4],t[0])):(e[0]=Math.atan2(t[6],t[5]),e[2]=0)):i==="YXZ"?(e[0]=Math.asin(-Math.min(Math.max(t[9],-1),1)),Math.abs(t[9])<.99999?(e[1]=Math.atan2(t[8],t[10]),e[2]=Math.atan2(t[1],t[5])):(e[1]=Math.atan2(-t[2],t[0]),e[2]=0)):i==="ZXY"?(e[0]=Math.asin(Math.min(Math.max(t[6],-1),1)),Math.abs(t[6])<.99999?(e[1]=Math.atan2(-t[2],t[10]),e[2]=Math.atan2(-t[4],t[5])):(e[1]=0,e[2]=Math.atan2(t[1],t[0]))):i==="ZYX"?(e[1]=Math.asin(-Math.min(Math.max(t[2],-1),1)),Math.abs(t[2])<.99999?(e[0]=Math.atan2(t[6],t[10]),e[2]=Math.atan2(t[1],t[0])):(e[0]=0,e[2]=Math.atan2(-t[4],t[5]))):i==="YZX"?(e[2]=Math.asin(Math.min(Math.max(t[1],-1),1)),Math.abs(t[1])<.99999?(e[0]=Math.atan2(-t[9],t[5]),e[1]=Math.atan2(-t[2],t[0])):(e[0]=0,e[1]=Math.atan2(t[8],t[10]))):i==="XZY"&&(e[2]=Math.asin(-Math.min(Math.max(t[4],-1),1)),Math.abs(t[4])<.99999?(e[0]=Math.atan2(t[6],t[5]),e[1]=Math.atan2(t[8],t[0])):(e[0]=Math.atan2(-t[9],t[10]),e[1]=0)),e}var Se=A(()=>{});var be,j,ve=A(()=>{Se();Z();be=new L,j=class extends Array{constructor(t=0,i=t,s=t,r="YXZ"){super(t,i,s),this.order=r,this.onChange=()=>{},this._target=this;let n=["0","1","2"];return new Proxy(this,{set(h,l){let a=Reflect.set(...arguments);return a&&n.includes(l)&&h.onChange(),a}})}get x(){return this[0]}get y(){return this[1]}get z(){return this[2]}set x(t){this._target[0]=t,this.onChange()}set y(t){this._target[1]=t,this.onChange()}set z(t){this._target[2]=t,this.onChange()}set(t,i=t,s=t){return t.length?this.copy(t):(this._target[0]=t,this._target[1]=i,this._target[2]=s,this.onChange(),this)}copy(t){return this._target[0]=t[0],this._target[1]=t[1],this._target[2]=t[2],this.onChange(),this}reorder(t){return this._target.order=t,this.onChange(),this}fromRotationMatrix(t,i=this.order){return Re(this._target,t,i),this.onChange(),this}fromQuaternion(t,i=this.order,s){return be.fromQuaternion(t),this._target.fromRotationMatrix(be,i),s||this.onChange(),this}fromArray(t,i=0){return this._target[0]=t[i],this._target[1]=t[i+1],this._target[2]=t[i+2],this}toArray(t=[],i=0){return t[i]=this[0],t[i+1]=this[1],t[i+2]=this[2],t}}});var $,Ce=A(()=>{H();ae();Z();ve();$=class{constructor(){this.parent=null,this.children=[],this.visible=!0,this.matrix=new L,this.worldMatrix=new L,this.matrixAutoUpdate=!0,this.worldMatrixNeedsUpdate=!1,this.position=new N,this.quaternion=new Q,this.scale=new N(1),this.rotation=new j,this.up=new N(0,1,0),this.rotation._target.onChange=()=>this.quaternion.fromEuler(this.rotation,!0),this.quaternion._target.onChange=()=>this.rotation.fromQuaternion(this.quaternion,void 0,!0)}setParent(t,i=!0){this.parent&&t!==this.parent&&this.parent.removeChild(this,!1),this.parent=t,i&&t&&t.addChild(this,!1)}addChild(t,i=!0){~this.children.indexOf(t)||this.children.push(t),i&&t.setParent(this,!1)}removeChild(t,i=!0){~this.children.indexOf(t)&&this.children.splice(this.children.indexOf(t),1),i&&t.setParent(null,!1)}updateMatrixWorld(t){this.matrixAutoUpdate&&this.updateMatrix(),(this.worldMatrixNeedsUpdate||t)&&(this.parent===null?this.worldMatrix.copy(this.matrix):this.worldMatrix.multiply(this.parent.worldMatrix,this.matrix),this.worldMatrixNeedsUpdate=!1,t=!0);for(let i=0,s=this.children.length;i<s;i++)this.children[i].updateMatrixWorld(t)}updateMatrix(){this.matrix.compose(this.quaternion,this.position,this.scale),this.worldMatrixNeedsUpdate=!0}traverse(t){if(!t(this))for(let i=0,s=this.children.length;i<s;i++)this.children[i].traverse(t)}decompose(){this.matrix.decompose(this.quaternion._target,this.position,this.scale),this.rotation.fromQuaternion(this.quaternion)}lookAt(t,i=!1){i?this.matrix.lookAt(this.position,t,this.up):this.matrix.lookAt(t,this.position,this.up),this.matrix.getRotation(this.quaternion._target),this.rotation.fromQuaternion(this.quaternion)}}});function De(e,t){return e[0]=t[0],e[1]=t[1],e[2]=t[2],e[3]=t[4],e[4]=t[5],e[5]=t[6],e[6]=t[8],e[7]=t[9],e[8]=t[10],e}function Ne(e,t){let i=t[0],s=t[1],r=t[2],n=t[3],h=i+i,l=s+s,a=r+r,f=i*h,c=s*h,d=s*l,o=r*h,g=r*l,p=r*a,u=n*h,x=n*l,m=n*a;return e[0]=1-d-p,e[3]=c-m,e[6]=o+x,e[1]=c+m,e[4]=1-f-p,e[7]=g-u,e[2]=o-x,e[5]=g+u,e[8]=1-f-d,e}function Le(e,t){return e[0]=t[0],e[1]=t[1],e[2]=t[2],e[3]=t[3],e[4]=t[4],e[5]=t[5],e[6]=t[6],e[7]=t[7],e[8]=t[8],e}function ze(e,t,i,s,r,n,h,l,a,f){return e[0]=t,e[1]=i,e[2]=s,e[3]=r,e[4]=n,e[5]=h,e[6]=l,e[7]=a,e[8]=f,e}function Ie(e){return e[0]=1,e[1]=0,e[2]=0,e[3]=0,e[4]=1,e[5]=0,e[6]=0,e[7]=0,e[8]=1,e}function Oe(e,t){let i=t[0],s=t[1],r=t[2],n=t[3],h=t[4],l=t[5],a=t[6],f=t[7],c=t[8],d=c*h-l*f,o=-c*n+l*a,g=f*n-h*a,p=i*d+s*o+r*g;return p?(p=1/p,e[0]=d*p,e[1]=(-c*s+r*f)*p,e[2]=(l*s-r*h)*p,e[3]=o*p,e[4]=(c*i-r*a)*p,e[5]=(-l*i+r*n)*p,e[6]=g*p,e[7]=(-f*i+s*a)*p,e[8]=(h*i-s*n)*p,e):null}function ut(e,t,i){let s=t[0],r=t[1],n=t[2],h=t[3],l=t[4],a=t[5],f=t[6],c=t[7],d=t[8],o=i[0],g=i[1],p=i[2],u=i[3],x=i[4],m=i[5],T=i[6],y=i[7],E=i[8];return e[0]=o*s+g*h+p*f,e[1]=o*r+g*l+p*c,e[2]=o*n+g*a+p*d,e[3]=u*s+x*h+m*f,e[4]=u*r+x*l+m*c,e[5]=u*n+x*a+m*d,e[6]=T*s+y*h+E*f,e[7]=T*r+y*l+E*c,e[8]=T*n+y*a+E*d,e}function Pe(e,t,i){let s=t[0],r=t[1],n=t[2],h=t[3],l=t[4],a=t[5],f=t[6],c=t[7],d=t[8],o=i[0],g=i[1];return e[0]=s,e[1]=r,e[2]=n,e[3]=h,e[4]=l,e[5]=a,e[6]=o*s+g*h+f,e[7]=o*r+g*l+c,e[8]=o*n+g*a+d,e}function Be(e,t,i){let s=t[0],r=t[1],n=t[2],h=t[3],l=t[4],a=t[5],f=t[6],c=t[7],d=t[8],o=Math.sin(i),g=Math.cos(i);return e[0]=g*s+o*h,e[1]=g*r+o*l,e[2]=g*n+o*a,e[3]=g*h-o*s,e[4]=g*l-o*r,e[5]=g*a-o*n,e[6]=f,e[7]=c,e[8]=d,e}function Ue(e,t,i){let s=i[0],r=i[1];return e[0]=s*t[0],e[1]=s*t[1],e[2]=s*t[2],e[3]=r*t[3],e[4]=r*t[4],e[5]=r*t[5],e[6]=t[6],e[7]=t[7],e[8]=t[8],e}function Ve(e,t){let i=t[0],s=t[1],r=t[2],n=t[3],h=t[4],l=t[5],a=t[6],f=t[7],c=t[8],d=t[9],o=t[10],g=t[11],p=t[12],u=t[13],x=t[14],m=t[15],T=i*l-s*h,y=i*a-r*h,E=i*f-n*h,M=s*a-r*l,F=s*f-n*l,w=r*f-n*a,b=c*u-d*p,v=c*x-o*p,R=c*m-g*p,C=d*x-o*u,S=d*m-g*u,D=o*m-g*x,_=T*D-y*S+E*C+M*R-F*v+w*b;return _?(_=1/_,e[0]=(l*D-a*S+f*C)*_,e[1]=(a*R-h*D-f*v)*_,e[2]=(h*S-l*R+f*b)*_,e[3]=(r*S-s*D-n*C)*_,e[4]=(i*D-r*R+n*v)*_,e[5]=(s*R-i*S-n*b)*_,e[6]=(u*w-x*F+m*M)*_,e[7]=(x*E-p*w-m*y)*_,e[8]=(p*F-u*E+m*T)*_,e):null}var Ge=A(()=>{});var K,Xe=A(()=>{Ge();K=class extends Array{constructor(t=1,i=0,s=0,r=0,n=1,h=0,l=0,a=0,f=1){return super(t,i,s,r,n,h,l,a,f),this}set(t,i,s,r,n,h,l,a,f){return t.length?this.copy(t):(ze(this,t,i,s,r,n,h,l,a,f),this)}translate(t,i=this){return Pe(this,i,t),this}rotate(t,i=this){return Be(this,i,t),this}scale(t,i=this){return Ue(this,i,t),this}multiply(t,i){return i?ut(this,t,i):ut(this,this,t),this}identity(){return Ie(this),this}copy(t){return Le(this,t),this}fromMatrix4(t){return De(this,t),this}fromQuaternion(t){return Ne(this,t),this}fromBasis(t,i,s){return this.set(t[0],t[1],t[2],i[0],i[1],i[2],s[0],s[1],s[2]),this}inverse(t=this){return Oe(this,t),this}getNormalMatrix(t){return Ve(this,t),this}}});var mi,O,ke=A(()=>{Ce();Xe();Z();mi=0,O=class extends ${constructor(t,{geometry:i,program:s,mode:r=t.TRIANGLES,frustumCulled:n=!0,renderOrder:h=0}={}){super(),t.canvas||console.error("gl not passed as first argument to Mesh"),this.gl=t,this.id=mi++,this.geometry=i,this.program=s,this.mode=r,this.frustumCulled=n,this.renderOrder=h,this.modelViewMatrix=new L,this.normalMatrix=new K,this.beforeRenderCallbacks=[],this.afterRenderCallbacks=[]}onBeforeRender(t){return this.beforeRenderCallbacks.push(t),this}onAfterRender(t){return this.afterRenderCallbacks.push(t),this}draw({camera:t}={}){t&&(this.program.uniforms.modelMatrix||Object.assign(this.program.uniforms,{modelMatrix:{value:null},viewMatrix:{value:null},modelViewMatrix:{value:null},normalMatrix:{value:null},projectionMatrix:{value:null},cameraPosition:{value:null}}),this.program.uniforms.projectionMatrix.value=t.projectionMatrix,this.program.uniforms.cameraPosition.value=t.worldPosition,this.program.uniforms.viewMatrix.value=t.viewMatrix,this.modelViewMatrix.multiply(t.viewMatrix,this.worldMatrix),this.normalMatrix.getNormalMatrix(this.modelViewMatrix),this.program.uniforms.modelMatrix.value=this.worldMatrix,this.program.uniforms.modelViewMatrix.value=this.modelViewMatrix,this.program.uniforms.normalMatrix.value=this.normalMatrix),this.beforeRenderCallbacks.forEach(s=>s&&s({mesh:this,camera:t}));let i=this.program.cullFace&&this.worldMatrix.determinant()<0;this.program.use({flipFaces:i}),this.geometry.draw({mode:this.mode,program:this.program}),this.afterRenderCallbacks.forEach(s=>s&&s({mesh:this,camera:t}))}}});function We(e){return(e&e-1)===0}var qe,Ei,U,He=A(()=>{qe=new Uint8Array(4);Ei=1,U=class{constructor(t,{image:i,target:s=t.TEXTURE_2D,type:r=t.UNSIGNED_BYTE,format:n=t.RGBA,internalFormat:h=n,wrapS:l=t.CLAMP_TO_EDGE,wrapT:a=t.CLAMP_TO_EDGE,wrapR:f=t.CLAMP_TO_EDGE,generateMipmaps:c=s===(t.TEXTURE_2D||t.TEXTURE_CUBE_MAP),minFilter:d=c?t.NEAREST_MIPMAP_LINEAR:t.LINEAR,magFilter:o=t.LINEAR,premultiplyAlpha:g=!1,unpackAlignment:p=4,flipY:u=s==(t.TEXTURE_2D||t.TEXTURE_3D),anisotropy:x=0,level:m=0,width:T,height:y=T,length:E=1}={}){this.gl=t,this.id=Ei++,this.image=i,this.target=s,this.type=r,this.format=n,this.internalFormat=h,this.minFilter=d,this.magFilter=o,this.wrapS=l,this.wrapT=a,this.wrapR=f,this.generateMipmaps=c,this.premultiplyAlpha=g,this.unpackAlignment=p,this.flipY=u,this.anisotropy=Math.min(x,this.gl.renderer.parameters.maxAnisotropy),this.level=m,this.width=T,this.height=y,this.length=E,this.texture=this.gl.createTexture(),this.store={image:null},this.glState=this.gl.renderer.state,this.state={},this.state.minFilter=this.gl.NEAREST_MIPMAP_LINEAR,this.state.magFilter=this.gl.LINEAR,this.state.wrapS=this.gl.REPEAT,this.state.wrapT=this.gl.REPEAT,this.state.anisotropy=0}bind(){this.glState.textureUnits[this.glState.activeTextureUnit]!==this.id&&(this.gl.bindTexture(this.target,this.texture),this.glState.textureUnits[this.glState.activeTextureUnit]=this.id)}update(t=0){let i=!(this.image===this.store.image&&!this.needsUpdate);if((i||this.glState.textureUnits[t]!==this.id)&&(this.gl.renderer.activeTexture(t),this.bind()),!!i){if(this.needsUpdate=!1,this.flipY!==this.glState.flipY&&(this.gl.pixelStorei(this.gl.UNPACK_FLIP_Y_WEBGL,this.flipY),this.glState.flipY=this.flipY),this.premultiplyAlpha!==this.glState.premultiplyAlpha&&(this.gl.pixelStorei(this.gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,this.premultiplyAlpha),this.glState.premultiplyAlpha=this.premultiplyAlpha),this.unpackAlignment!==this.glState.unpackAlignment&&(this.gl.pixelStorei(this.gl.UNPACK_ALIGNMENT,this.unpackAlignment),this.glState.unpackAlignment=this.unpackAlignment),this.minFilter!==this.state.minFilter&&(this.gl.texParameteri(this.target,this.gl.TEXTURE_MIN_FILTER,this.minFilter),this.state.minFilter=this.minFilter),this.magFilter!==this.state.magFilter&&(this.gl.texParameteri(this.target,this.gl.TEXTURE_MAG_FILTER,this.magFilter),this.state.magFilter=this.magFilter),this.wrapS!==this.state.wrapS&&(this.gl.texParameteri(this.target,this.gl.TEXTURE_WRAP_S,this.wrapS),this.state.wrapS=this.wrapS),this.wrapT!==this.state.wrapT&&(this.gl.texParameteri(this.target,this.gl.TEXTURE_WRAP_T,this.wrapT),this.state.wrapT=this.wrapT),this.wrapR!==this.state.wrapR&&(this.gl.texParameteri(this.target,this.gl.TEXTURE_WRAP_R,this.wrapR),this.state.wrapR=this.wrapR),this.anisotropy&&this.anisotropy!==this.state.anisotropy&&(this.gl.texParameterf(this.target,this.gl.renderer.getExtension("EXT_texture_filter_anisotropic").TEXTURE_MAX_ANISOTROPY_EXT,this.anisotropy),this.state.anisotropy=this.anisotropy),this.image){if(this.image.width&&(this.width=this.image.width,this.height=this.image.height),this.target===this.gl.TEXTURE_CUBE_MAP)for(let s=0;s<6;s++)this.gl.texImage2D(this.gl.TEXTURE_CUBE_MAP_POSITIVE_X+s,this.level,this.internalFormat,this.format,this.type,this.image[s]);else if(ArrayBuffer.isView(this.image))this.target===this.gl.TEXTURE_2D?this.gl.texImage2D(this.target,this.level,this.internalFormat,this.width,this.height,0,this.format,this.type,this.image):(this.target===this.gl.TEXTURE_2D_ARRAY||this.target===this.gl.TEXTURE_3D)&&this.gl.texImage3D(this.target,this.level,this.internalFormat,this.width,this.height,this.length,0,this.format,this.type,this.image);else if(this.image.isCompressedTexture)for(let s=0;s<this.image.length;s++)this.gl.compressedTexImage2D(this.target,s,this.internalFormat,this.image[s].width,this.image[s].height,0,this.image[s].data);else this.target===this.gl.TEXTURE_2D?this.gl.texImage2D(this.target,this.level,this.internalFormat,this.format,this.type,this.image):this.gl.texImage3D(this.target,this.level,this.internalFormat,this.width,this.height,this.length,0,this.format,this.type,this.image);this.generateMipmaps&&(!this.gl.renderer.isWebgl2&&(!We(this.image.width)||!We(this.image.height))?(this.generateMipmaps=!1,this.wrapS=this.wrapT=this.gl.CLAMP_TO_EDGE,this.minFilter=this.gl.LINEAR):this.gl.generateMipmap(this.target)),this.onUpdate&&this.onUpdate()}else if(this.target===this.gl.TEXTURE_CUBE_MAP)for(let s=0;s<6;s++)this.gl.texImage2D(this.gl.TEXTURE_CUBE_MAP_POSITIVE_X+s,0,this.gl.RGBA,1,1,0,this.gl.RGBA,this.gl.UNSIGNED_BYTE,qe);else this.width?this.target===this.gl.TEXTURE_2D?this.gl.texImage2D(this.target,this.level,this.internalFormat,this.width,this.height,0,this.format,this.type,null):this.gl.texImage3D(this.target,this.level,this.internalFormat,this.width,this.height,this.length,0,this.format,this.type,null):this.gl.texImage2D(this.target,0,this.gl.RGBA,1,1,0,this.gl.RGBA,this.gl.UNSIGNED_BYTE,qe);this.store.image=this.image}}}});var V,Ye=A(()=>{He();V=class{constructor(t,{width:i=t.canvas.width,height:s=t.canvas.height,target:r=t.FRAMEBUFFER,color:n=1,depth:h=!0,stencil:l=!1,depthTexture:a=!1,wrapS:f=t.CLAMP_TO_EDGE,wrapT:c=t.CLAMP_TO_EDGE,wrapR:d=t.CLAMP_TO_EDGE,minFilter:o=t.LINEAR,magFilter:g=o,type:p=t.UNSIGNED_BYTE,format:u=t.RGBA,internalFormat:x=u,unpackAlignment:m,premultiplyAlpha:T}={}){this.gl=t,this.width=i,this.height=s,this.depth=h,this.stencil=l,this.buffer=this.gl.createFramebuffer(),this.target=r,this.gl.renderer.bindFramebuffer(this),this.textures=[];let y=[];for(let E=0;E<n;E++)this.textures.push(new U(t,{width:i,height:s,wrapS:f,wrapT:c,wrapR:d,minFilter:o,magFilter:g,type:p,format:u,internalFormat:x,unpackAlignment:m,premultiplyAlpha:T,flipY:!1,generateMipmaps:!1})),this.textures[E].update(),this.gl.framebufferTexture2D(this.target,this.gl.COLOR_ATTACHMENT0+E,this.gl.TEXTURE_2D,this.textures[E].texture,0),y.push(this.gl.COLOR_ATTACHMENT0+E);y.length>1&&this.gl.renderer.drawBuffers(y),this.texture=this.textures[0],a&&(this.gl.renderer.isWebgl2||this.gl.renderer.getExtension("WEBGL_depth_texture"))?(this.depthTexture=new U(t,{width:i,height:s,minFilter:this.gl.NEAREST,magFilter:this.gl.NEAREST,format:this.stencil?this.gl.DEPTH_STENCIL:this.gl.DEPTH_COMPONENT,internalFormat:t.renderer.isWebgl2?this.stencil?this.gl.DEPTH24_STENCIL8:this.gl.DEPTH_COMPONENT16:this.gl.DEPTH_COMPONENT,type:this.stencil?this.gl.UNSIGNED_INT_24_8:this.gl.UNSIGNED_INT}),this.depthTexture.update(),this.gl.framebufferTexture2D(this.target,this.stencil?this.gl.DEPTH_STENCIL_ATTACHMENT:this.gl.DEPTH_ATTACHMENT,this.gl.TEXTURE_2D,this.depthTexture.texture,0)):(h&&!l&&(this.depthBuffer=this.gl.createRenderbuffer(),this.gl.bindRenderbuffer(this.gl.RENDERBUFFER,this.depthBuffer),this.gl.renderbufferStorage(this.gl.RENDERBUFFER,this.gl.DEPTH_COMPONENT16,i,s),this.gl.framebufferRenderbuffer(this.target,this.gl.DEPTH_ATTACHMENT,this.gl.RENDERBUFFER,this.depthBuffer)),l&&!h&&(this.stencilBuffer=this.gl.createRenderbuffer(),this.gl.bindRenderbuffer(this.gl.RENDERBUFFER,this.stencilBuffer),this.gl.renderbufferStorage(this.gl.RENDERBUFFER,this.gl.STENCIL_INDEX8,i,s),this.gl.framebufferRenderbuffer(this.target,this.gl.STENCIL_ATTACHMENT,this.gl.RENDERBUFFER,this.stencilBuffer)),h&&l&&(this.depthStencilBuffer=this.gl.createRenderbuffer(),this.gl.bindRenderbuffer(this.gl.RENDERBUFFER,this.depthStencilBuffer),this.gl.renderbufferStorage(this.gl.RENDERBUFFER,this.gl.DEPTH_STENCIL,i,s),this.gl.framebufferRenderbuffer(this.target,this.gl.DEPTH_STENCIL_ATTACHMENT,this.gl.RENDERBUFFER,this.depthStencilBuffer))),this.gl.renderer.bindFramebuffer({target:this.target})}setSize(t,i){if(!(this.width===t&&this.height===i)){this.width=t,this.height=i,this.gl.renderer.bindFramebuffer(this);for(let s=0;s<this.textures.length;s++)this.textures[s].width=t,this.textures[s].height=i,this.textures[s].needsUpdate=!0,this.textures[s].update(),this.gl.framebufferTexture2D(this.target,this.gl.COLOR_ATTACHMENT0+s,this.gl.TEXTURE_2D,this.textures[s].texture,0);this.depthTexture?(this.depthTexture.width=t,this.depthTexture.height=i,this.depthTexture.needsUpdate=!0,this.depthTexture.update(),this.gl.framebufferTexture2D(this.target,this.gl.DEPTH_ATTACHMENT,this.gl.TEXTURE_2D,this.depthTexture.texture,0)):(this.depthBuffer&&(this.gl.bindRenderbuffer(this.gl.RENDERBUFFER,this.depthBuffer),this.gl.renderbufferStorage(this.gl.RENDERBUFFER,this.gl.DEPTH_COMPONENT16,t,i)),this.stencilBuffer&&(this.gl.bindRenderbuffer(this.gl.RENDERBUFFER,this.stencilBuffer),this.gl.renderbufferStorage(this.gl.RENDERBUFFER,this.gl.STENCIL_INDEX8,t,i)),this.depthStencilBuffer&&(this.gl.bindRenderbuffer(this.gl.RENDERBUFFER,this.depthStencilBuffer),this.gl.renderbufferStorage(this.gl.RENDERBUFFER,this.gl.DEPTH_STENCIL,t,i))),this.gl.renderer.bindFramebuffer({target:this.target})}}}});function Ze(e){e.length===4&&(e=e[0]+e[1]+e[1]+e[2]+e[2]+e[3]+e[3]);let t=/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(e);return t||console.warn(`Unable to convert hex string ${e} to rgb values`),[parseInt(t[1],16)/255,parseInt(t[2],16)/255,parseInt(t[3],16)/255]}function yi(e){return e=parseInt(e),[(e>>16&255)/255,(e>>8&255)/255,(e&255)/255]}function xt(e){return e===void 0?[0,0,0]:arguments.length===3?arguments:isNaN(e)?e[0]==="#"?Ze(e):Qe[e.toLowerCase()]?Ze(Qe[e.toLowerCase()]):(console.warn("Color format not recognised"),[0,0,0]):yi(e)}var Qe,je=A(()=>{Qe={black:"#000000",white:"#ffffff",red:"#ff0000",green:"#00ff00",blue:"#0000ff",fuchsia:"#ff00ff",cyan:"#00ffff",yellow:"#ffff00",orange:"#ff8000"}});var G,$e=A(()=>{je();G=class extends Array{constructor(t){return Array.isArray(t)?super(...t):super(...xt(...arguments))}get r(){return this[0]}get g(){return this[1]}get b(){return this[2]}set r(t){this[0]=t}set g(t){this[1]=t}set b(t){this[2]=t}set(t){return Array.isArray(t)?this.copy(t):this.copy(xt(...arguments))}copy(t){return this[0]=t[0],this[1]=t[1],this[2]=t[2],this}}});var X,Ke=A(()=>{Ot();X=class extends Y{constructor(t,{attributes:i={}}={}){Object.assign(i,{position:{size:2,data:new Float32Array([-1,-1,3,-1,-1,3])},uv:{size:2,data:new Float32Array([0,0,2,0,0,2])}}),super(t,i)}}});var Je=A(()=>{Vt();Gt();ke();Ye();$e();Ke()});var wi=si(()=>{Je();var ei=12,mt=8,ti=`#version 300 es
+in vec2 position;
+void main() {
+  gl_Position = vec4(position, 0.0, 1.0);
+}
+`,Mi=`#version 300 es
+precision highp float;
+
+uniform float uTime;
+uniform vec2 uResolution;
+uniform vec3 uColors[${mt}];
+uniform int uColorCount;
+uniform int uStrandCount;
+uniform float uSpeed;
+uniform float uAmplitude;
+uniform float uWaviness;
+uniform float uThickness;
+uniform float uGlow;
+uniform float uTaper;
+uniform float uSpread;
+uniform float uHueShift;
+uniform float uIntensity;
+uniform float uOpacity;
+uniform float uScale;
+uniform float uSaturation;
+
+out vec4 fragColor;
+
+const float PI = 3.14159265;
+
+vec3 spectrum(float t) {
+  return 0.5 + 0.5 * cos(2.0 * PI * (t + vec3(0.00, 0.33, 0.67)));
+}
+
+vec3 samplePalette(float t) {
+  t = fract(t);
+  float scaled = t * float(uColorCount);
+  int idx = int(floor(scaled));
+  float blend = fract(scaled);
+  int nextIdx = idx + 1;
+  if (nextIdx >= uColorCount) nextIdx = 0;
+  return mix(uColors[idx], uColors[nextIdx], blend);
+}
+
+vec3 strandColor(float t) {
+  if (uColorCount > 0) return samplePalette(t);
+  return spectrum(t);
+}
+
+void main() {
+  vec2 uv = (gl_FragCoord.xy - 0.5 * uResolution) / uResolution.y;
+  uv /= max(uScale, 0.0001);
+
+  float e = 0.06 + uIntensity * 0.94;
+  float env = pow(max(cos(uv.x * PI * 1.3), 0.0), uTaper);
+
+  vec3 col = vec3(0.0);
+
+  for (int i = 0; i < ${ei}; i++) {
+    if (i >= uStrandCount) break;
+
+    float fi = float(i);
+    float ph = fi * 1.7 * uSpread;
+    float freq = (2.0 + fi * 0.35) * uWaviness;
+    float spd = 1.4 + fi * 1.2;
+
+    float tt = uTime * uSpeed;
+    float w = sin(uv.x * freq + tt * spd + ph) * 0.60
+            + sin(uv.x * freq * 1.1 - tt * spd * 0.7 + ph * 1.7) * 0.40;
+
+    float amp = (0.1 + 0.02 * e) * env * uAmplitude;
+    float y = w * amp;
+
+    float d = abs(uv.y - y);
+    float thick = (0.001 + 0.05 * e) * (0.35 + env) * uThickness;
+    float g = thick / (d + thick * 0.45);
+    g = g * g;
+
+    float h = fi / float(uStrandCount) + uv.x * 0.30 + uTime * 0.04 + uHueShift;
+    col += strandColor(h) * g * env;
+  }
+
+  col *= 0.45 + 0.7 * e;
+  col = 1.0 - exp(-col * uGlow);
+
+  float gray = dot(col, vec3(0.2126, 0.7152, 0.0722));
+  col = max(mix(vec3(gray), col, uSaturation), 0.0);
+
+  float lum = max(max(col.r, col.g), col.b);
+  float alpha = clamp(lum, 0.0, 1.0) * uOpacity;
+
+  fragColor = vec4(col * uOpacity, alpha);
+}
+`,_i=`#version 300 es
+precision highp float;
+
+uniform sampler2D uScene;
+uniform vec2 uResolution;
+uniform float uRadius;
+uniform float uRefraction;
+uniform float uDispersion;
+
+out vec4 fragColor;
+
+vec2 toUv(vec2 p) {
+  return p * (uResolution.y / uResolution) + 0.5;
+}
+
+void main() {
+  vec2 p = (gl_FragCoord.xy - 0.5 * uResolution) / uResolution.y;
+  float d = length(p);
+  float r = uRadius;
+
+  float edge = fwidth(d) * 1.5;
+  float mask = 1.0 - smoothstep(r - edge, r + edge, d);
+  if (mask <= 0.0) {
+    fragColor = vec4(0.0);
+    return;
+  }
+
+  float z = sqrt(max(r * r - d * d, 0.0)) / r;
+  float nd = d / r;
+
+  vec2 dir = d > 0.0 ? p / d : vec2(0.0);
+  float lens = smoothstep(0.85, 1.0, nd) * pow(nd, 6.0);
+  vec2 offset = -dir * lens * uRefraction * 0.15;
+  vec2 disp = -dir * lens * uDispersion * 0.012;
+
+  vec3 light;
+  light.r = texture(uScene, toUv(p + offset - disp)).r;
+  light.g = texture(uScene, toUv(p + offset)).g;
+  light.b = texture(uScene, toUv(p + offset + disp)).b;
+
+  float fres = pow(1.0 - z, 3.0);
+  vec3 rim = vec3(1.0) * fres * 0.18;
+
+  vec2 lightDir = normalize(vec2(-0.55, 0.6));
+  float spec = pow(max(dot(p / max(r, 1e-4), lightDir), 0.0), 6.0);
+  spec *= smoothstep(r, r * 0.55, d);
+
+  vec3 emissive = light + rim + vec3(spec) * 0.4;
+  float emissiveA = clamp(max(max(emissive.r, emissive.g), emissive.b), 0.0, 1.0);
+
+  float bodyA = 0.05 + fres * 0.05;
+
+  float outA = emissiveA + bodyA * (1.0 - emissiveA);
+  vec3 outRGB = emissive;
+
+  outRGB *= mask;
+  outA *= mask;
+
+  fragColor = vec4(outRGB, outA);
+}
+`,Ti=e=>{var s;let t=e&&e.length?e:["#ffffff"],i=[];for(let r=0;r<mt;r++){let n=(s=t[r])!=null?s:t[t.length-1],h=new G(n);i.push([h.r,h.g,h.b])}return i},Ai={colors:["#FF4242","#7C3AED","#06B6D4","#EAB308"],count:3,speed:.5,amplitude:1,waviness:1,thickness:.7,glow:2.6,taper:3,spread:1,hueShift:0,intensity:.6,saturation:1.5,opacity:1,scale:1.5,glass:!1,refraction:1,dispersion:1,glassSize:1};function ii(e,t){if(!e||typeof window=="undefined")return null;let i=Object.assign({},Ai,t);try{let o=function(){let u=e.offsetWidth,x=e.offsetHeight;r.setSize(u,x),l.uniforms.uResolution.value=[u,x],f.setSize(u,x),c.uniforms.uResolution.value=[u,x],s&&g(0)},g=function(u){l.uniforms.uTime.value=u*.001,i.glass?(r.render({scene:a,target:f}),c.uniforms.uScene.value=f.texture,r.render({scene:d})):r.render({scene:a})},s=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches,r=new B({alpha:!0,premultipliedAlpha:!0,antialias:!0}),n=r.gl;if(!n||!r.isWebgl2)throw new Error("WebGL2 unavailable");n.clearColor(0,0,0,0),n.enable(n.BLEND),n.blendFunc(n.ONE,n.ONE_MINUS_SRC_ALPHA),n.canvas.style.backgroundColor="transparent";let h=new X(n);h.attributes.uv&&delete h.attributes.uv;let l=new I(n,{vertex:ti,fragment:Mi,uniforms:{uTime:{value:0},uResolution:{value:[e.offsetWidth,e.offsetHeight]},uColors:{value:Ti(i.colors)},uColorCount:{value:Math.min(i.colors.length,mt)},uStrandCount:{value:Math.min(Math.max(Math.round(i.count),1),ei)},uSpeed:{value:i.speed},uAmplitude:{value:i.amplitude},uWaviness:{value:i.waviness},uThickness:{value:i.thickness},uGlow:{value:i.glow},uTaper:{value:i.taper},uSpread:{value:i.spread},uHueShift:{value:i.hueShift},uIntensity:{value:i.intensity},uOpacity:{value:i.opacity},uScale:{value:i.scale},uSaturation:{value:i.saturation}}}),a=new O(n,{geometry:h,program:l}),f=new V(n,{width:e.offsetWidth,height:e.offsetHeight}),c=new I(n,{vertex:ti,fragment:_i,uniforms:{uScene:{value:f.texture},uResolution:{value:[e.offsetWidth,e.offsetHeight]},uRadius:{value:.46*i.glassSize},uRefraction:{value:i.refraction},uDispersion:{value:i.dispersion}}}),d=new O(n,{geometry:h,program:c});e.appendChild(n.canvas),window.addEventListener("resize",o),o();let p=0;if(s)g(0);else{let u=x=>{p=requestAnimationFrame(u),g(x)};p=requestAnimationFrame(u)}return function(){var x;p&&cancelAnimationFrame(p),window.removeEventListener("resize",o),n.canvas.parentNode===e&&e.removeChild(n.canvas),(x=n.getExtension("WEBGL_lose_context"))==null||x.loseContext()}}catch(s){return window.console&&console.warn&&console.warn("[login] Strands background disabled:",s),null}}window.mountLoginStrands=ii;(function(){function t(){let i=document.getElementById("login-strands");i&&ii(i,{colors:["#F97316","#7C3AED","#06B6D4"],count:7,speed:1.5,amplitude:1.4,waviness:1.6,thickness:1.7,glow:1.1,taper:2.8,spread:1.2,intensity:.5,saturation:2,opacity:1,scale:2.5,glass:!1,refraction:1,dispersion:1,glassSize:1,hueShift:1})}document.readyState==="loading"?document.addEventListener("DOMContentLoaded",t):t()})()});wi();})();
+
+</script>
+<script>/* access.js */
+"use strict";
+(function () {
+  var STATUS_POLL_MS = 10000;
+  var body = document.body;
+  var csrf = document.querySelector('meta[name="csrf-token"]').content;
+  var nextPath = body.dataset.next || "/";
+
+  var formState = document.getElementById("access-form-state");
+  var pendingState = document.getElementById("access-pending-state");
+  var deniedState = document.getElementById("access-denied-state");
+  var form = document.getElementById("access-form");
+  var errorEl = document.getElementById("access-error");
+  var labelInput = document.getElementById("access-label");
+  var purposeInput = document.getElementById("access-purpose");
+
+  function showState(name) {
+    formState.classList.toggle("hidden", name !== "form");
+    pendingState.classList.toggle("hidden", name !== "pending");
+    deniedState.classList.toggle("hidden", name !== "denied");
+  }
+
+  function showError(message) {
+    errorEl.textContent = message;
+    errorEl.classList.remove("hidden");
+  }
+
+  function clearError() {
+    errorEl.textContent = "";
+    errorEl.classList.add("hidden");
+  }
+
+  function startPolling() {
+    function poll() {
+      fetch("/access/status", { headers: { Accept: "application/json" } })
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+          if (data.status === "approved") {
+            window.location.assign(nextPath);
+          } else if (data.status === "denied" || data.status === "revoked") {
+            showState("denied");
+          } else {
+            window.setTimeout(poll, STATUS_POLL_MS);
+          }
+        })
+        .catch(function () {
+          window.setTimeout(poll, STATUS_POLL_MS);
+        });
+    }
+    window.setTimeout(poll, STATUS_POLL_MS);
+  }
+
+  if (form) {
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+      clearError();
+      var label = labelInput.value.trim();
+      var purpose = purposeInput.value.trim();
+      if (!label || !purpose) {
+        showError("Name and purpose are both required.");
+        return;
+      }
+      var submitBtn = form.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+      fetch("/access", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-CSRF-Token": csrf, Accept: "application/json" },
+        body: JSON.stringify({ label: label, purpose: purpose }),
+      })
+        .then(function (res) {
+          return res.json().then(function (data) { return { ok: res.ok, data: data }; });
+        })
+        .then(function (result) {
+          if (!result.ok) {
+            showError(result.data.error || "Request failed.");
+            submitBtn.disabled = false;
+            return;
+          }
+          if (result.data.status === "approved") {
+            window.location.assign(nextPath);
+            return;
+          }
+          showState("pending");
+          startPolling();
+        })
+        .catch(function () {
+          showError("Request failed. Check your connection and try again.");
+          submitBtn.disabled = false;
+        });
+    });
+  }
+
+  if (body.dataset.state === "pending") startPolling();
+})();
+
+</script>
+</body>
+</html>
